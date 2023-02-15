@@ -529,13 +529,13 @@ var require_ms = __commonJS({
     var d = h * 24;
     var w = d * 7;
     var y = d * 365.25;
-    module2.exports = function(val, options) {
-      options = options || {};
+    module2.exports = function(val, options2) {
+      options2 = options2 || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
         return parse(val);
       } else if (type === "number" && isFinite(val)) {
-        return options.long ? fmtLong(val) : fmtShort(val);
+        return options2.long ? fmtLong(val) : fmtShort(val);
       }
       throw new Error(
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
@@ -2460,8 +2460,8 @@ var require_server = __commonJS({
     var { FST_ERR_HTTP2_INVALID_VERSION, FST_ERR_REOPENED_CLOSE_SERVER, FST_ERR_REOPENED_SERVER } = require_errors2();
     module2.exports.createServer = createServer;
     module2.exports.compileValidateHTTPVersion = compileValidateHTTPVersion;
-    function createServer(options, httpHandler) {
-      const server = getServerInstance(options, httpHandler);
+    function createServer(options2, httpHandler) {
+      const server = getServerInstance(options2, httpHandler);
       return { server, listen };
       function listen(listenOptions, ...args) {
         let cb = args.slice(-1).pop();
@@ -2494,7 +2494,7 @@ var require_server = __commonJS({
               cb(err, address);
               return;
             }
-            multipleBindings.call(this, server, httpHandler, options, listenOptions, () => {
+            multipleBindings.call(this, server, httpHandler, options2, listenOptions, () => {
               this[kState].listening = true;
               cb(null, address);
             });
@@ -2505,7 +2505,7 @@ var require_server = __commonJS({
           if (host === "localhost") {
             return listening.then((address) => {
               return new Promise((resolve, reject) => {
-                multipleBindings.call(this, server, httpHandler, options, listenOptions, () => {
+                multipleBindings.call(this, server, httpHandler, options2, listenOptions, () => {
                   this[kState].listening = true;
                   resolve(address);
                 });
@@ -2619,15 +2619,15 @@ var require_server = __commonJS({
         ]);
       });
     }
-    function compileValidateHTTPVersion(options) {
+    function compileValidateHTTPVersion(options2) {
       let bypass = false;
       const map = /* @__PURE__ */ new Map();
-      if (options.serverFactory) {
+      if (options2.serverFactory) {
         bypass = true;
       }
-      if (options.http2) {
+      if (options2.http2) {
         map.set("2.0", true);
-        if (options.https && options.https.allowHTTP1 === true) {
+        if (options2.https && options2.https.allowHTTP1 === true) {
           map.set("1.1", true);
           map.set("1.0", true);
         }
@@ -2639,31 +2639,31 @@ var require_server = __commonJS({
         return bypass || map.has(httpVersion);
       };
     }
-    function getServerInstance(options, httpHandler) {
+    function getServerInstance(options2, httpHandler) {
       let server = null;
-      if (options.serverFactory) {
-        server = options.serverFactory(httpHandler, options);
-      } else if (options.http2) {
-        if (options.https) {
-          server = http2().createSecureServer(options.https, httpHandler);
+      if (options2.serverFactory) {
+        server = options2.serverFactory(httpHandler, options2);
+      } else if (options2.http2) {
+        if (options2.https) {
+          server = http2().createSecureServer(options2.https, httpHandler);
         } else {
           server = http2().createServer(httpHandler);
         }
-        server.on("session", sessionTimeout(options.http2SessionTimeout));
+        server.on("session", sessionTimeout(options2.http2SessionTimeout));
       } else {
-        if (options.https) {
-          server = https.createServer(options.https, httpHandler);
+        if (options2.https) {
+          server = https.createServer(options2.https, httpHandler);
         } else {
           server = http.createServer(httpHandler);
         }
-        server.keepAliveTimeout = options.keepAliveTimeout;
-        server.requestTimeout = options.requestTimeout;
-        if (options.maxRequestsPerSocket > 0) {
-          server.maxRequestsPerSocket = options.maxRequestsPerSocket;
+        server.keepAliveTimeout = options2.keepAliveTimeout;
+        server.requestTimeout = options2.requestTimeout;
+        if (options2.maxRequestsPerSocket > 0) {
+          server.maxRequestsPerSocket = options2.maxRequestsPerSocket;
         }
       }
-      if (!options.serverFactory) {
-        server.setTimeout(options.connectionTimeout);
+      if (!options2.serverFactory) {
+        server.setTimeout(options2.connectionTimeout);
       }
       return server;
     }
@@ -2672,23 +2672,23 @@ var require_server = __commonJS({
         return { port: 0, host: "localhost" };
       }
       const cb = typeof args[args.length - 1] === "function" ? args.pop() : void 0;
-      const options = { cb };
+      const options2 = { cb };
       const firstArg = args[0];
       const argsLength = args.length;
       const lastArg = args[argsLength - 1];
       if (typeof firstArg === "string" && isNaN(firstArg)) {
-        options.path = firstArg;
-        options.backlog = argsLength > 1 ? lastArg : void 0;
+        options2.path = firstArg;
+        options2.backlog = argsLength > 1 ? lastArg : void 0;
       } else {
-        options.port = argsLength >= 1 && Number.isInteger(firstArg) ? firstArg : normalizePort(firstArg);
-        options.host = argsLength >= 2 && args[1] ? args[1] : "localhost";
-        options.backlog = argsLength >= 3 ? args[2] : void 0;
+        options2.port = argsLength >= 1 && Number.isInteger(firstArg) ? firstArg : normalizePort(firstArg);
+        options2.host = argsLength >= 2 && args[1] ? args[1] : "localhost";
+        options2.backlog = argsLength >= 3 ? args[2] : void 0;
       }
-      return options;
+      return options2;
     }
     function normalizePort(firstArg) {
-      const port2 = Number(firstArg);
-      return port2 >= 0 && !Number.isNaN(port2) && Number.isInteger(port2) ? port2 : 0;
+      const port = Number(firstArg);
+      return port >= 0 && !Number.isNaN(port) && Number.isInteger(port) ? port : 0;
     }
     function logServerAddress(server) {
       let address = server.address();
@@ -3318,23 +3318,23 @@ var require_logger = __commonJS({
       const ts = process.hrtime();
       return ts[0] * 1e3 + ts[1] / 1e6;
     }
-    function createLogger(options) {
-      if (isValidLogger(options.logger)) {
+    function createLogger(options2) {
+      if (isValidLogger(options2.logger)) {
         const logger = createPinoLogger({
-          logger: options.logger,
-          serializers: Object.assign({}, serializers, options.logger.serializers)
+          logger: options2.logger,
+          serializers: Object.assign({}, serializers, options2.logger.serializers)
         });
         return { logger, hasLogger: true };
-      } else if (!options.logger) {
+      } else if (!options2.logger) {
         const logger = nullLogger;
         logger.child = () => logger;
         return { logger, hasLogger: false };
       } else {
         const localLoggerOptions = {};
-        if (Object.prototype.toString.call(options.logger) === "[object Object]") {
-          Reflect.ownKeys(options.logger).forEach((prop) => {
+        if (Object.prototype.toString.call(options2.logger) === "[object Object]") {
+          Reflect.ownKeys(options2.logger).forEach((prop) => {
             Object.defineProperty(localLoggerOptions, prop, {
-              value: options.logger[prop],
+              value: options2.logger[prop],
               writable: true,
               enumerable: true,
               configurable: true
@@ -3343,8 +3343,8 @@ var require_logger = __commonJS({
         }
         localLoggerOptions.level = localLoggerOptions.level || "info";
         localLoggerOptions.serializers = Object.assign({}, serializers, localLoggerOptions.serializers);
-        options.logger = localLoggerOptions;
-        const logger = createPinoLogger(options.logger);
+        options2.logger = localLoggerOptions;
+        const logger = createPinoLogger(options2.logger);
         return { logger, hasLogger: true };
       }
     }
@@ -3752,8 +3752,8 @@ var require_error_serializer = __commonJS({
     "use strict";
     var STR_ESCAPE = /[\u0000-\u001f\u0022\u005c\ud800-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?:[^\ud800-\udbff]|^)[\udc00-\udfff]/;
     var Serializer = class {
-      constructor(options = {}) {
-        switch (options.rounding) {
+      constructor(options2 = {}) {
+        switch (options2.rounding) {
           case "floor":
             this.parseInteger = Math.floor;
             break;
@@ -5697,7 +5697,7 @@ var require_re = __commonJS({
 var require_parse_options = __commonJS({
   "../../../node_modules/semver/internal/parse-options.js"(exports, module2) {
     var opts = ["includePrerelease", "loose", "rtl"];
-    var parseOptions = (options) => !options ? {} : typeof options !== "object" ? { loose: true } : opts.filter((k) => options[k]).reduce((o, k) => {
+    var parseOptions = (options2) => !options2 ? {} : typeof options2 !== "object" ? { loose: true } : opts.filter((k) => options2[k]).reduce((o, k) => {
       o[k] = true;
       return o;
     }, {});
@@ -5735,10 +5735,10 @@ var require_semver = __commonJS({
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer = class {
-      constructor(version, options) {
-        options = parseOptions(options);
+      constructor(version, options2) {
+        options2 = parseOptions(options2);
         if (version instanceof SemVer) {
-          if (version.loose === !!options.loose && version.includePrerelease === !!options.includePrerelease) {
+          if (version.loose === !!options2.loose && version.includePrerelease === !!options2.includePrerelease) {
             return version;
           } else {
             version = version.version;
@@ -5751,11 +5751,11 @@ var require_semver = __commonJS({
             `version is longer than ${MAX_LENGTH} characters`
           );
         }
-        debug("SemVer", version, options);
-        this.options = options;
-        this.loose = !!options.loose;
-        this.includePrerelease = !!options.includePrerelease;
-        const m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
+        debug("SemVer", version, options2);
+        this.options = options2;
+        this.loose = !!options2.loose;
+        this.includePrerelease = !!options2.includePrerelease;
+        const m = version.trim().match(options2.loose ? re[t.LOOSE] : re[t.FULL]);
         if (!m) {
           throw new TypeError(`Invalid Version: ${version}`);
         }
@@ -5961,8 +5961,8 @@ var require_parse = __commonJS({
     var { re, t } = require_re();
     var SemVer = require_semver();
     var parseOptions = require_parse_options();
-    var parse = (version, options) => {
-      options = parseOptions(options);
+    var parse = (version, options2) => {
+      options2 = parseOptions(options2);
       if (version instanceof SemVer) {
         return version;
       }
@@ -5972,12 +5972,12 @@ var require_parse = __commonJS({
       if (version.length > MAX_LENGTH) {
         return null;
       }
-      const r = options.loose ? re[t.LOOSE] : re[t.FULL];
+      const r = options2.loose ? re[t.LOOSE] : re[t.FULL];
       if (!r.test(version)) {
         return null;
       }
       try {
-        return new SemVer(version, options);
+        return new SemVer(version, options2);
       } catch (er) {
         return null;
       }
@@ -5990,8 +5990,8 @@ var require_parse = __commonJS({
 var require_valid = __commonJS({
   "../../../node_modules/semver/functions/valid.js"(exports, module2) {
     var parse = require_parse();
-    var valid = (version, options) => {
-      const v = parse(version, options);
+    var valid = (version, options2) => {
+      const v = parse(version, options2);
       return v ? v.version : null;
     };
     module2.exports = valid;
@@ -6002,8 +6002,8 @@ var require_valid = __commonJS({
 var require_clean = __commonJS({
   "../../../node_modules/semver/functions/clean.js"(exports, module2) {
     var parse = require_parse();
-    var clean = (version, options) => {
-      const s = parse(version.trim().replace(/^[=v]+/, ""), options);
+    var clean = (version, options2) => {
+      const s = parse(version.trim().replace(/^[=v]+/, ""), options2);
       return s ? s.version : null;
     };
     module2.exports = clean;
@@ -6014,15 +6014,15 @@ var require_clean = __commonJS({
 var require_inc = __commonJS({
   "../../../node_modules/semver/functions/inc.js"(exports, module2) {
     var SemVer = require_semver();
-    var inc = (version, release, options, identifier) => {
-      if (typeof options === "string") {
-        identifier = options;
-        options = void 0;
+    var inc = (version, release, options2, identifier) => {
+      if (typeof options2 === "string") {
+        identifier = options2;
+        options2 = void 0;
       }
       try {
         return new SemVer(
           version instanceof SemVer ? version.version : version,
-          options
+          options2
         ).inc(release, identifier).version;
       } catch (er) {
         return null;
@@ -6109,8 +6109,8 @@ var require_patch = __commonJS({
 var require_prerelease = __commonJS({
   "../../../node_modules/semver/functions/prerelease.js"(exports, module2) {
     var parse = require_parse();
-    var prerelease = (version, options) => {
-      const parsed = parse(version, options);
+    var prerelease = (version, options2) => {
+      const parsed = parse(version, options2);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
     module2.exports = prerelease;
@@ -6266,7 +6266,7 @@ var require_coerce = __commonJS({
     var SemVer = require_semver();
     var parse = require_parse();
     var { re, t } = require_re();
-    var coerce = (version, options) => {
+    var coerce = (version, options2) => {
       if (version instanceof SemVer) {
         return version;
       }
@@ -6276,9 +6276,9 @@ var require_coerce = __commonJS({
       if (typeof version !== "string") {
         return null;
       }
-      options = options || {};
+      options2 = options2 || {};
       let match = null;
-      if (!options.rtl) {
+      if (!options2.rtl) {
         match = version.match(re[t.COERCE]);
       } else {
         let next;
@@ -6293,7 +6293,7 @@ var require_coerce = __commonJS({
       if (match === null) {
         return null;
       }
-      return parse(`${match[2]}.${match[3] || "0"}.${match[4] || "0"}`, options);
+      return parse(`${match[2]}.${match[3] || "0"}.${match[4] || "0"}`, options2);
     };
     module2.exports = coerce;
   }
@@ -6699,23 +6699,23 @@ var require_lru_cache = __commonJS({
     var UPDATE_AGE_ON_GET = Symbol("updateAgeOnGet");
     var naiveLength = () => 1;
     var LRUCache = class {
-      constructor(options) {
-        if (typeof options === "number")
-          options = { max: options };
-        if (!options)
-          options = {};
-        if (options.max && (typeof options.max !== "number" || options.max < 0))
+      constructor(options2) {
+        if (typeof options2 === "number")
+          options2 = { max: options2 };
+        if (!options2)
+          options2 = {};
+        if (options2.max && (typeof options2.max !== "number" || options2.max < 0))
           throw new TypeError("max must be a non-negative number");
-        const max = this[MAX] = options.max || Infinity;
-        const lc = options.length || naiveLength;
+        const max = this[MAX] = options2.max || Infinity;
+        const lc = options2.length || naiveLength;
         this[LENGTH_CALCULATOR] = typeof lc !== "function" ? naiveLength : lc;
-        this[ALLOW_STALE] = options.stale || false;
-        if (options.maxAge && typeof options.maxAge !== "number")
+        this[ALLOW_STALE] = options2.stale || false;
+        if (options2.maxAge && typeof options2.maxAge !== "number")
           throw new TypeError("maxAge must be a number");
-        this[MAX_AGE] = options.maxAge || 0;
-        this[DISPOSE] = options.dispose;
-        this[NO_DISPOSE_ON_SET] = options.noDisposeOnSet || false;
-        this[UPDATE_AGE_ON_GET] = options.updateAgeOnGet || false;
+        this[MAX_AGE] = options2.maxAge || 0;
+        this[DISPOSE] = options2.dispose;
+        this[NO_DISPOSE_ON_SET] = options2.noDisposeOnSet || false;
+        this[UPDATE_AGE_ON_GET] = options2.updateAgeOnGet || false;
         this.reset();
       }
       // resize the cache when the max changes.
@@ -6956,13 +6956,13 @@ var require_lru_cache = __commonJS({
 var require_range = __commonJS({
   "../../../node_modules/semver/classes/range.js"(exports, module2) {
     var Range = class {
-      constructor(range, options) {
-        options = parseOptions(options);
+      constructor(range, options2) {
+        options2 = parseOptions(options2);
         if (range instanceof Range) {
-          if (range.loose === !!options.loose && range.includePrerelease === !!options.includePrerelease) {
+          if (range.loose === !!options2.loose && range.includePrerelease === !!options2.includePrerelease) {
             return range;
           } else {
-            return new Range(range.raw, options);
+            return new Range(range.raw, options2);
           }
         }
         if (range instanceof Comparator) {
@@ -6971,9 +6971,9 @@ var require_range = __commonJS({
           this.format();
           return this;
         }
-        this.options = options;
-        this.loose = !!options.loose;
-        this.includePrerelease = !!options.includePrerelease;
+        this.options = options2;
+        this.loose = !!options2.loose;
+        this.includePrerelease = !!options2.includePrerelease;
         this.raw = range;
         this.set = range.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
         if (!this.set.length) {
@@ -7044,15 +7044,15 @@ var require_range = __commonJS({
         cache.set(memoKey, result);
         return result;
       }
-      intersects(range, options) {
+      intersects(range, options2) {
         if (!(range instanceof Range)) {
           throw new TypeError("a Range is required");
         }
         return this.set.some((thisComparators) => {
-          return isSatisfiable(thisComparators, options) && range.set.some((rangeComparators) => {
-            return isSatisfiable(rangeComparators, options) && thisComparators.every((thisComparator) => {
+          return isSatisfiable(thisComparators, options2) && range.set.some((rangeComparators) => {
+            return isSatisfiable(rangeComparators, options2) && thisComparators.every((thisComparator) => {
               return rangeComparators.every((rangeComparator) => {
-                return thisComparator.intersects(rangeComparator, options);
+                return thisComparator.intersects(rangeComparator, options2);
               });
             });
           });
@@ -7094,36 +7094,36 @@ var require_range = __commonJS({
     } = require_re();
     var isNullSet = (c) => c.value === "<0.0.0-0";
     var isAny = (c) => c.value === "";
-    var isSatisfiable = (comparators, options) => {
+    var isSatisfiable = (comparators, options2) => {
       let result = true;
       const remainingComparators = comparators.slice();
       let testComparator = remainingComparators.pop();
       while (result && remainingComparators.length) {
         result = remainingComparators.every((otherComparator) => {
-          return testComparator.intersects(otherComparator, options);
+          return testComparator.intersects(otherComparator, options2);
         });
         testComparator = remainingComparators.pop();
       }
       return result;
     };
-    var parseComparator = (comp, options) => {
-      debug("comp", comp, options);
-      comp = replaceCarets(comp, options);
+    var parseComparator = (comp, options2) => {
+      debug("comp", comp, options2);
+      comp = replaceCarets(comp, options2);
       debug("caret", comp);
-      comp = replaceTildes(comp, options);
+      comp = replaceTildes(comp, options2);
       debug("tildes", comp);
-      comp = replaceXRanges(comp, options);
+      comp = replaceXRanges(comp, options2);
       debug("xrange", comp);
-      comp = replaceStars(comp, options);
+      comp = replaceStars(comp, options2);
       debug("stars", comp);
       return comp;
     };
     var isX = (id) => !id || id.toLowerCase() === "x" || id === "*";
-    var replaceTildes = (comp, options) => comp.trim().split(/\s+/).map((c) => {
-      return replaceTilde(c, options);
+    var replaceTildes = (comp, options2) => comp.trim().split(/\s+/).map((c) => {
+      return replaceTilde(c, options2);
     }).join(" ");
-    var replaceTilde = (comp, options) => {
-      const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE];
+    var replaceTilde = (comp, options2) => {
+      const r = options2.loose ? re[t.TILDELOOSE] : re[t.TILDE];
       return comp.replace(r, (_, M, m, p, pr) => {
         debug("tilde", comp, _, M, m, p, pr);
         let ret;
@@ -7143,13 +7143,13 @@ var require_range = __commonJS({
         return ret;
       });
     };
-    var replaceCarets = (comp, options) => comp.trim().split(/\s+/).map((c) => {
-      return replaceCaret(c, options);
+    var replaceCarets = (comp, options2) => comp.trim().split(/\s+/).map((c) => {
+      return replaceCaret(c, options2);
     }).join(" ");
-    var replaceCaret = (comp, options) => {
-      debug("caret", comp, options);
-      const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET];
-      const z = options.includePrerelease ? "-0" : "";
+    var replaceCaret = (comp, options2) => {
+      debug("caret", comp, options2);
+      const r = options2.loose ? re[t.CARETLOOSE] : re[t.CARET];
+      const z = options2.includePrerelease ? "-0" : "";
       return comp.replace(r, (_, M, m, p, pr) => {
         debug("caret", comp, _, M, m, p, pr);
         let ret;
@@ -7190,15 +7190,15 @@ var require_range = __commonJS({
         return ret;
       });
     };
-    var replaceXRanges = (comp, options) => {
-      debug("replaceXRanges", comp, options);
+    var replaceXRanges = (comp, options2) => {
+      debug("replaceXRanges", comp, options2);
       return comp.split(/\s+/).map((c) => {
-        return replaceXRange(c, options);
+        return replaceXRange(c, options2);
       }).join(" ");
     };
-    var replaceXRange = (comp, options) => {
+    var replaceXRange = (comp, options2) => {
       comp = comp.trim();
-      const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE];
+      const r = options2.loose ? re[t.XRANGELOOSE] : re[t.XRANGE];
       return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
         debug("xRange", comp, ret, gtlt, M, m, p, pr);
         const xM = isX(M);
@@ -7208,7 +7208,7 @@ var require_range = __commonJS({
         if (gtlt === "=" && anyX) {
           gtlt = "";
         }
-        pr = options.includePrerelease ? "-0" : "";
+        pr = options2.includePrerelease ? "-0" : "";
         if (xM) {
           if (gtlt === ">" || gtlt === "<") {
             ret = "<0.0.0-0";
@@ -7251,13 +7251,13 @@ var require_range = __commonJS({
         return ret;
       });
     };
-    var replaceStars = (comp, options) => {
-      debug("replaceStars", comp, options);
+    var replaceStars = (comp, options2) => {
+      debug("replaceStars", comp, options2);
       return comp.trim().replace(re[t.STAR], "");
     };
-    var replaceGTE0 = (comp, options) => {
-      debug("replaceGTE0", comp, options);
-      return comp.trim().replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], "");
+    var replaceGTE0 = (comp, options2) => {
+      debug("replaceGTE0", comp, options2);
+      return comp.trim().replace(re[options2.includePrerelease ? t.GTE0PRE : t.GTE0], "");
     };
     var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) => {
       if (isX(fM)) {
@@ -7286,13 +7286,13 @@ var require_range = __commonJS({
       }
       return `${from} ${to}`.trim();
     };
-    var testSet = (set, version, options) => {
+    var testSet = (set, version, options2) => {
       for (let i = 0; i < set.length; i++) {
         if (!set[i].test(version)) {
           return false;
         }
       }
-      if (version.prerelease.length && !options.includePrerelease) {
+      if (version.prerelease.length && !options2.includePrerelease) {
         for (let i = 0; i < set.length; i++) {
           debug(set[i].semver);
           if (set[i].semver === Comparator.ANY) {
@@ -7320,18 +7320,18 @@ var require_comparator = __commonJS({
       static get ANY() {
         return ANY;
       }
-      constructor(comp, options) {
-        options = parseOptions(options);
+      constructor(comp, options2) {
+        options2 = parseOptions(options2);
         if (comp instanceof Comparator) {
-          if (comp.loose === !!options.loose) {
+          if (comp.loose === !!options2.loose) {
             return comp;
           } else {
             comp = comp.value;
           }
         }
-        debug("comparator", comp, options);
-        this.options = options;
-        this.loose = !!options.loose;
+        debug("comparator", comp, options2);
+        this.options = options2;
+        this.loose = !!options2.loose;
         this.parse(comp);
         if (this.semver === ANY) {
           this.value = "";
@@ -7373,13 +7373,13 @@ var require_comparator = __commonJS({
         }
         return cmp(version, this.operator, this.semver, this.options);
       }
-      intersects(comp, options) {
+      intersects(comp, options2) {
         if (!(comp instanceof Comparator)) {
           throw new TypeError("a Comparator is required");
         }
-        if (!options || typeof options !== "object") {
-          options = {
-            loose: !!options,
+        if (!options2 || typeof options2 !== "object") {
+          options2 = {
+            loose: !!options2,
             includePrerelease: false
           };
         }
@@ -7387,19 +7387,19 @@ var require_comparator = __commonJS({
           if (this.value === "") {
             return true;
           }
-          return new Range(comp.value, options).test(this.value);
+          return new Range(comp.value, options2).test(this.value);
         } else if (comp.operator === "") {
           if (comp.value === "") {
             return true;
           }
-          return new Range(this.value, options).test(comp.semver);
+          return new Range(this.value, options2).test(comp.semver);
         }
         const sameDirectionIncreasing = (this.operator === ">=" || this.operator === ">") && (comp.operator === ">=" || comp.operator === ">");
         const sameDirectionDecreasing = (this.operator === "<=" || this.operator === "<") && (comp.operator === "<=" || comp.operator === "<");
         const sameSemVer = this.semver.version === comp.semver.version;
         const differentDirectionsInclusive = (this.operator === ">=" || this.operator === "<=") && (comp.operator === ">=" || comp.operator === "<=");
-        const oppositeDirectionsLessThan = cmp(this.semver, "<", comp.semver, options) && (this.operator === ">=" || this.operator === ">") && (comp.operator === "<=" || comp.operator === "<");
-        const oppositeDirectionsGreaterThan = cmp(this.semver, ">", comp.semver, options) && (this.operator === "<=" || this.operator === "<") && (comp.operator === ">=" || comp.operator === ">");
+        const oppositeDirectionsLessThan = cmp(this.semver, "<", comp.semver, options2) && (this.operator === ">=" || this.operator === ">") && (comp.operator === "<=" || comp.operator === "<");
+        const oppositeDirectionsGreaterThan = cmp(this.semver, ">", comp.semver, options2) && (this.operator === "<=" || this.operator === "<") && (comp.operator === ">=" || comp.operator === ">");
         return sameDirectionIncreasing || sameDirectionDecreasing || sameSemVer && differentDirectionsInclusive || oppositeDirectionsLessThan || oppositeDirectionsGreaterThan;
       }
     };
@@ -7417,9 +7417,9 @@ var require_comparator = __commonJS({
 var require_satisfies = __commonJS({
   "../../../node_modules/semver/functions/satisfies.js"(exports, module2) {
     var Range = require_range();
-    var satisfies = (version, range, options) => {
+    var satisfies = (version, range, options2) => {
       try {
-        range = new Range(range, options);
+        range = new Range(range, options2);
       } catch (er) {
         return false;
       }
@@ -7433,7 +7433,7 @@ var require_satisfies = __commonJS({
 var require_to_comparators = __commonJS({
   "../../../node_modules/semver/ranges/to-comparators.js"(exports, module2) {
     var Range = require_range();
-    var toComparators = (range, options) => new Range(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
+    var toComparators = (range, options2) => new Range(range, options2).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
     module2.exports = toComparators;
   }
 });
@@ -7443,12 +7443,12 @@ var require_max_satisfying = __commonJS({
   "../../../node_modules/semver/ranges/max-satisfying.js"(exports, module2) {
     var SemVer = require_semver();
     var Range = require_range();
-    var maxSatisfying = (versions, range, options) => {
+    var maxSatisfying = (versions, range, options2) => {
       let max = null;
       let maxSV = null;
       let rangeObj = null;
       try {
-        rangeObj = new Range(range, options);
+        rangeObj = new Range(range, options2);
       } catch (er) {
         return null;
       }
@@ -7456,7 +7456,7 @@ var require_max_satisfying = __commonJS({
         if (rangeObj.test(v)) {
           if (!max || maxSV.compare(v) === -1) {
             max = v;
-            maxSV = new SemVer(max, options);
+            maxSV = new SemVer(max, options2);
           }
         }
       });
@@ -7471,12 +7471,12 @@ var require_min_satisfying = __commonJS({
   "../../../node_modules/semver/ranges/min-satisfying.js"(exports, module2) {
     var SemVer = require_semver();
     var Range = require_range();
-    var minSatisfying = (versions, range, options) => {
+    var minSatisfying = (versions, range, options2) => {
       let min = null;
       let minSV = null;
       let rangeObj = null;
       try {
-        rangeObj = new Range(range, options);
+        rangeObj = new Range(range, options2);
       } catch (er) {
         return null;
       }
@@ -7484,7 +7484,7 @@ var require_min_satisfying = __commonJS({
         if (rangeObj.test(v)) {
           if (!min || minSV.compare(v) === 1) {
             min = v;
-            minSV = new SemVer(min, options);
+            minSV = new SemVer(min, options2);
           }
         }
       });
@@ -7554,9 +7554,9 @@ var require_min_version = __commonJS({
 var require_valid2 = __commonJS({
   "../../../node_modules/semver/ranges/valid.js"(exports, module2) {
     var Range = require_range();
-    var validRange = (range, options) => {
+    var validRange = (range, options2) => {
       try {
-        return new Range(range, options).range || "*";
+        return new Range(range, options2).range || "*";
       } catch (er) {
         return null;
       }
@@ -7577,9 +7577,9 @@ var require_outside = __commonJS({
     var lt = require_lt();
     var lte = require_lte();
     var gte = require_gte();
-    var outside = (version, range, hilo, options) => {
-      version = new SemVer(version, options);
-      range = new Range(range, options);
+    var outside = (version, range, hilo, options2) => {
+      version = new SemVer(version, options2);
+      range = new Range(range, options2);
       let gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
         case ">":
@@ -7599,7 +7599,7 @@ var require_outside = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version, range, options)) {
+      if (satisfies(version, range, options2)) {
         return false;
       }
       for (let i = 0; i < range.set.length; ++i) {
@@ -7612,9 +7612,9 @@ var require_outside = __commonJS({
           }
           high = high || comparator;
           low = low || comparator;
-          if (gtfn(comparator.semver, high.semver, options)) {
+          if (gtfn(comparator.semver, high.semver, options2)) {
             high = comparator;
-          } else if (ltfn(comparator.semver, low.semver, options)) {
+          } else if (ltfn(comparator.semver, low.semver, options2)) {
             low = comparator;
           }
         });
@@ -7637,7 +7637,7 @@ var require_outside = __commonJS({
 var require_gtr = __commonJS({
   "../../../node_modules/semver/ranges/gtr.js"(exports, module2) {
     var outside = require_outside();
-    var gtr = (version, range, options) => outside(version, range, ">", options);
+    var gtr = (version, range, options2) => outside(version, range, ">", options2);
     module2.exports = gtr;
   }
 });
@@ -7646,7 +7646,7 @@ var require_gtr = __commonJS({
 var require_ltr = __commonJS({
   "../../../node_modules/semver/ranges/ltr.js"(exports, module2) {
     var outside = require_outside();
-    var ltr = (version, range, options) => outside(version, range, "<", options);
+    var ltr = (version, range, options2) => outside(version, range, "<", options2);
     module2.exports = ltr;
   }
 });
@@ -7655,9 +7655,9 @@ var require_ltr = __commonJS({
 var require_intersects = __commonJS({
   "../../../node_modules/semver/ranges/intersects.js"(exports, module2) {
     var Range = require_range();
-    var intersects = (r1, r2, options) => {
-      r1 = new Range(r1, options);
-      r2 = new Range(r2, options);
+    var intersects = (r1, r2, options2) => {
+      r1 = new Range(r1, options2);
+      r2 = new Range(r2, options2);
       return r1.intersects(r2);
     };
     module2.exports = intersects;
@@ -7669,13 +7669,13 @@ var require_simplify = __commonJS({
   "../../../node_modules/semver/ranges/simplify.js"(exports, module2) {
     var satisfies = require_satisfies();
     var compare = require_compare();
-    module2.exports = (versions, range, options) => {
+    module2.exports = (versions, range, options2) => {
       const set = [];
       let first = null;
       let prev = null;
-      const v = versions.sort((a, b) => compare(a, b, options));
+      const v = versions.sort((a, b) => compare(a, b, options2));
       for (const version of v) {
-        const included = satisfies(version, range, options);
+        const included = satisfies(version, range, options2);
         if (included) {
           prev = version;
           if (!first) {
@@ -7721,17 +7721,17 @@ var require_subset = __commonJS({
     var { ANY } = Comparator;
     var satisfies = require_satisfies();
     var compare = require_compare();
-    var subset = (sub, dom, options = {}) => {
+    var subset = (sub, dom, options2 = {}) => {
       if (sub === dom) {
         return true;
       }
-      sub = new Range(sub, options);
-      dom = new Range(dom, options);
+      sub = new Range(sub, options2);
+      dom = new Range(dom, options2);
       let sawNonNull = false;
       OUTER:
         for (const simpleSub of sub.set) {
           for (const simpleDom of dom.set) {
-            const isSub = simpleSubset(simpleSub, simpleDom, options);
+            const isSub = simpleSubset(simpleSub, simpleDom, options2);
             sawNonNull = sawNonNull || isSub !== null;
             if (isSub) {
               continue OUTER;
@@ -7743,21 +7743,21 @@ var require_subset = __commonJS({
         }
       return true;
     };
-    var simpleSubset = (sub, dom, options) => {
+    var simpleSubset = (sub, dom, options2) => {
       if (sub === dom) {
         return true;
       }
       if (sub.length === 1 && sub[0].semver === ANY) {
         if (dom.length === 1 && dom[0].semver === ANY) {
           return true;
-        } else if (options.includePrerelease) {
+        } else if (options2.includePrerelease) {
           sub = [new Comparator(">=0.0.0-0")];
         } else {
           sub = [new Comparator(">=0.0.0")];
         }
       }
       if (dom.length === 1 && dom[0].semver === ANY) {
-        if (options.includePrerelease) {
+        if (options2.includePrerelease) {
           return true;
         } else {
           dom = [new Comparator(">=0.0.0")];
@@ -7767,9 +7767,9 @@ var require_subset = __commonJS({
       let gt, lt;
       for (const c of sub) {
         if (c.operator === ">" || c.operator === ">=") {
-          gt = higherGT(gt, c, options);
+          gt = higherGT(gt, c, options2);
         } else if (c.operator === "<" || c.operator === "<=") {
-          lt = lowerLT(lt, c, options);
+          lt = lowerLT(lt, c, options2);
         } else {
           eqSet.add(c.semver);
         }
@@ -7779,7 +7779,7 @@ var require_subset = __commonJS({
       }
       let gtltComp;
       if (gt && lt) {
-        gtltComp = compare(gt.semver, lt.semver, options);
+        gtltComp = compare(gt.semver, lt.semver, options2);
         if (gtltComp > 0) {
           return null;
         } else if (gtltComp === 0 && (gt.operator !== ">=" || lt.operator !== "<=")) {
@@ -7787,14 +7787,14 @@ var require_subset = __commonJS({
         }
       }
       for (const eq of eqSet) {
-        if (gt && !satisfies(eq, String(gt), options)) {
+        if (gt && !satisfies(eq, String(gt), options2)) {
           return null;
         }
-        if (lt && !satisfies(eq, String(lt), options)) {
+        if (lt && !satisfies(eq, String(lt), options2)) {
           return null;
         }
         for (const c of dom) {
-          if (!satisfies(eq, String(c), options)) {
+          if (!satisfies(eq, String(c), options2)) {
             return false;
           }
         }
@@ -7802,8 +7802,8 @@ var require_subset = __commonJS({
       }
       let higher, lower;
       let hasDomLT, hasDomGT;
-      let needDomLTPre = lt && !options.includePrerelease && lt.semver.prerelease.length ? lt.semver : false;
-      let needDomGTPre = gt && !options.includePrerelease && gt.semver.prerelease.length ? gt.semver : false;
+      let needDomLTPre = lt && !options2.includePrerelease && lt.semver.prerelease.length ? lt.semver : false;
+      let needDomGTPre = gt && !options2.includePrerelease && gt.semver.prerelease.length ? gt.semver : false;
       if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
         needDomLTPre = false;
       }
@@ -7817,11 +7817,11 @@ var require_subset = __commonJS({
             }
           }
           if (c.operator === ">" || c.operator === ">=") {
-            higher = higherGT(gt, c, options);
+            higher = higherGT(gt, c, options2);
             if (higher === c && higher !== gt) {
               return false;
             }
-          } else if (gt.operator === ">=" && !satisfies(gt.semver, String(c), options)) {
+          } else if (gt.operator === ">=" && !satisfies(gt.semver, String(c), options2)) {
             return false;
           }
         }
@@ -7832,11 +7832,11 @@ var require_subset = __commonJS({
             }
           }
           if (c.operator === "<" || c.operator === "<=") {
-            lower = lowerLT(lt, c, options);
+            lower = lowerLT(lt, c, options2);
             if (lower === c && lower !== lt) {
               return false;
             }
-          } else if (lt.operator === "<=" && !satisfies(lt.semver, String(c), options)) {
+          } else if (lt.operator === "<=" && !satisfies(lt.semver, String(c), options2)) {
             return false;
           }
         }
@@ -7855,18 +7855,18 @@ var require_subset = __commonJS({
       }
       return true;
     };
-    var higherGT = (a, b, options) => {
+    var higherGT = (a, b, options2) => {
       if (!a) {
         return b;
       }
-      const comp = compare(a.semver, b.semver, options);
+      const comp = compare(a.semver, b.semver, options2);
       return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
     };
-    var lowerLT = (a, b, options) => {
+    var lowerLT = (a, b, options2) => {
       if (!a) {
         return b;
       }
-      const comp = compare(a.semver, b.semver, options);
+      const comp = compare(a.semver, b.semver, options2);
       return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
     };
     module2.exports = subset;
@@ -8124,7 +8124,7 @@ var require_request = __commonJS({
           const routeLimit = context._parserOptions.limit;
           const serverLimit = context.server.initialConfig.bodyLimit;
           const version = context.server.hasConstraintStrategy("version") ? this.raw.headers["accept-version"] : void 0;
-          const options = {
+          const options2 = {
             method: context.config.method,
             url: context.config.url,
             bodyLimit: routeLimit || serverLimit,
@@ -8134,7 +8134,7 @@ var require_request = __commonJS({
             prefixTrailingSlash: context.prefixTrailingSlash,
             version
           };
-          return Object.freeze(options);
+          return Object.freeze(options2);
         }
       },
       routerMethod: {
@@ -8648,10 +8648,10 @@ var require_secure_json_parse = __commonJS({
     var hasBuffer = typeof Buffer !== "undefined";
     var suspectProtoRx = /"(?:_|\\u005[Ff])(?:_|\\u005[Ff])(?:p|\\u0070)(?:r|\\u0072)(?:o|\\u006[Ff])(?:t|\\u0074)(?:o|\\u006[Ff])(?:_|\\u005[Ff])(?:_|\\u005[Ff])"\s*:/;
     var suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-    function _parse(text, reviver, options) {
-      if (options == null) {
+    function _parse(text, reviver, options2) {
+      if (options2 == null) {
         if (reviver !== null && typeof reviver === "object") {
-          options = reviver;
+          options2 = reviver;
           reviver = void 0;
         }
       }
@@ -8665,8 +8665,8 @@ var require_secure_json_parse = __commonJS({
       if (obj === null || typeof obj !== "object") {
         return obj;
       }
-      const protoAction = options && options.protoAction || "error";
-      const constructorAction = options && options.constructorAction || "error";
+      const protoAction = options2 && options2.protoAction || "error";
+      const constructorAction = options2 && options2.constructorAction || "error";
       if (protoAction === "ignore" && constructorAction === "ignore") {
         return obj;
       }
@@ -8683,7 +8683,7 @@ var require_secure_json_parse = __commonJS({
           return obj;
         }
       }
-      return filter(obj, { protoAction, constructorAction, safe: options && options.safe });
+      return filter(obj, { protoAction, constructorAction, safe: options2 && options2.safe });
     }
     function filter(obj, { protoAction = "error", constructorAction = "error", safe } = {}) {
       let next = [obj];
@@ -8717,11 +8717,11 @@ var require_secure_json_parse = __commonJS({
       }
       return obj;
     }
-    function parse(text, reviver, options) {
+    function parse(text, reviver, options2) {
       const stackTraceLimit = Error.stackTraceLimit;
       Error.stackTraceLimit = 0;
       try {
-        return _parse(text, reviver, options);
+        return _parse(text, reviver, options2);
       } finally {
         Error.stackTraceLimit = stackTraceLimit;
       }
@@ -8909,9 +8909,9 @@ var require_contentTypeParser = __commonJS({
         });
       }
     };
-    function rawBody(request, reply, options, parser, done) {
+    function rawBody(request, reply, options2, parser, done) {
       const asString = parser.asString;
-      const limit = options.limit === null ? parser.bodyLimit : options.limit;
+      const limit = options2.limit === null ? parser.bodyLimit : options2.limit;
       const contentLength = request.headers["content-length"] === void 0 ? NaN : Number(request.headers["content-length"]);
       if (contentLength > limit) {
         reply.header("connection", "close");
@@ -9097,7 +9097,7 @@ var require_deepmerge = __commonJS({
   "../../../node_modules/@fastify/deepmerge/index.js"(exports, module2) {
     "use strict";
     var JSON_PROTO = Object.getPrototypeOf({});
-    function deepmergeConstructor(options) {
+    function deepmergeConstructor(options2) {
       function isNotPrototypeKey(value) {
         return value !== "constructor" && value !== "prototype" && value !== "__proto__";
       }
@@ -9144,8 +9144,8 @@ var require_deepmerge = __commonJS({
         }
         return result;
       }
-      const getKeys = options && options.symbols ? getSymbolsAndKeys : Object.keys;
-      const cloneProtoObject = typeof (options == null ? void 0 : options.cloneProtoObject) === "function" ? options.cloneProtoObject : void 0;
+      const getKeys = options2 && options2.symbols ? getSymbolsAndKeys : Object.keys;
+      const cloneProtoObject = typeof (options2 == null ? void 0 : options2.cloneProtoObject) === "function" ? options2.cloneProtoObject : void 0;
       function isMergeableObject(value) {
         return typeof value === "object" && value !== null && !(value instanceof RegExp) && !(value instanceof Date);
       }
@@ -9153,7 +9153,7 @@ var require_deepmerge = __commonJS({
         return typeof value !== "object" || value === null;
       }
       const isPrimitiveOrBuiltIn = typeof Buffer !== "undefined" ? (value) => typeof value !== "object" || value === null || value instanceof RegExp || value instanceof Date || value instanceof Buffer : (value) => typeof value !== "object" || value === null || value instanceof RegExp || value instanceof Date;
-      const mergeArray = options && typeof options.mergeArray === "function" ? options.mergeArray({ clone, deepmerge: _deepmerge, getKeys, isMergeableObject }) : concatArrays;
+      const mergeArray = options2 && typeof options2.mergeArray === "function" ? options2.mergeArray({ clone, deepmerge: _deepmerge, getKeys, isMergeableObject }) : concatArrays;
       function clone(entry) {
         return isMergeableObject(entry) ? Array.isArray(entry) ? cloneArray(entry) : cloneObject(entry) : entry;
       }
@@ -9201,7 +9201,7 @@ var require_deepmerge = __commonJS({
         }
         return result;
       }
-      return options && options.all ? _deepmergeAll : _deepmerge;
+      return options2 && options2.all ? _deepmergeAll : _deepmerge;
     }
     module2.exports = deepmergeConstructor;
     module2.exports.default = deepmergeConstructor;
@@ -10489,8 +10489,8 @@ var require_serializer = __commonJS({
     "use strict";
     var STR_ESCAPE = /[\u0000-\u001f\u0022\u005c\ud800-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?:[^\ud800-\udbff]|^)[\udc00-\udfff]/;
     module2.exports = class Serializer {
-      constructor(options = {}) {
-        switch (options.rounding) {
+      constructor(options2 = {}) {
+        switch (options2.rounding) {
           case "floor":
             this.parseInteger = Math.floor;
             break;
@@ -14185,11 +14185,11 @@ var require_uri_all = __commonJS({
       var URI_PARSE = /^(?:([^:\/?#]+):)?(?:\/\/((?:([^\/?#@]*)@)?(\[[^\/?#\]]+\]|[^\/?#:]*)(?:\:(\d*))?))?([^?#]*)(?:\?([^#]*))?(?:#((?:.|\n|\r)*))?/i;
       var NO_MATCH_IS_UNDEFINED = "".match(/(){0}/)[1] === void 0;
       function parse(uriString) {
-        var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+        var options2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
         var components = {};
-        var protocol = options.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
-        if (options.reference === "suffix")
-          uriString = (options.scheme ? options.scheme + ":" : "") + "//" + uriString;
+        var protocol = options2.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
+        if (options2.reference === "suffix")
+          uriString = (options2.scheme ? options2.scheme + ":" : "") + "//" + uriString;
         var matches = uriString.match(URI_PARSE);
         if (matches) {
           if (NO_MATCH_IS_UNDEFINED) {
@@ -14227,12 +14227,12 @@ var require_uri_all = __commonJS({
           } else {
             components.reference = "uri";
           }
-          if (options.reference && options.reference !== "suffix" && options.reference !== components.reference) {
-            components.error = components.error || "URI is not a " + options.reference + " reference.";
+          if (options2.reference && options2.reference !== "suffix" && options2.reference !== components.reference) {
+            components.error = components.error || "URI is not a " + options2.reference + " reference.";
           }
-          var schemeHandler = SCHEMES[(options.scheme || components.scheme || "").toLowerCase()];
-          if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
-            if (components.host && (options.domainHost || schemeHandler && schemeHandler.domainHost)) {
+          var schemeHandler = SCHEMES[(options2.scheme || components.scheme || "").toLowerCase()];
+          if (!options2.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
+            if (components.host && (options2.domainHost || schemeHandler && schemeHandler.domainHost)) {
               try {
                 components.host = punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase());
               } catch (e) {
@@ -14244,15 +14244,15 @@ var require_uri_all = __commonJS({
             _normalizeComponentEncoding(components, protocol);
           }
           if (schemeHandler && schemeHandler.parse) {
-            schemeHandler.parse(components, options);
+            schemeHandler.parse(components, options2);
           }
         } else {
           components.error = components.error || "URI can not be parsed.";
         }
         return components;
       }
-      function _recomposeAuthority(components, options) {
-        var protocol = options.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
+      function _recomposeAuthority(components, options2) {
+        var protocol = options2.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
         var uriTokens = [];
         if (components.userinfo !== void 0) {
           uriTokens.push(components.userinfo);
@@ -14299,30 +14299,30 @@ var require_uri_all = __commonJS({
         return output.join("");
       }
       function serialize(components) {
-        var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-        var protocol = options.iri ? IRI_PROTOCOL : URI_PROTOCOL;
+        var options2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+        var protocol = options2.iri ? IRI_PROTOCOL : URI_PROTOCOL;
         var uriTokens = [];
-        var schemeHandler = SCHEMES[(options.scheme || components.scheme || "").toLowerCase()];
+        var schemeHandler = SCHEMES[(options2.scheme || components.scheme || "").toLowerCase()];
         if (schemeHandler && schemeHandler.serialize)
-          schemeHandler.serialize(components, options);
+          schemeHandler.serialize(components, options2);
         if (components.host) {
           if (protocol.IPV6ADDRESS.test(components.host)) {
-          } else if (options.domainHost || schemeHandler && schemeHandler.domainHost) {
+          } else if (options2.domainHost || schemeHandler && schemeHandler.domainHost) {
             try {
-              components.host = !options.iri ? punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase()) : punycode.toUnicode(components.host);
+              components.host = !options2.iri ? punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase()) : punycode.toUnicode(components.host);
             } catch (e) {
-              components.error = components.error || "Host's domain name can not be converted to " + (!options.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
+              components.error = components.error || "Host's domain name can not be converted to " + (!options2.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
             }
           }
         }
         _normalizeComponentEncoding(components, protocol);
-        if (options.reference !== "suffix" && components.scheme) {
+        if (options2.reference !== "suffix" && components.scheme) {
           uriTokens.push(components.scheme);
           uriTokens.push(":");
         }
-        var authority = _recomposeAuthority(components, options);
+        var authority = _recomposeAuthority(components, options2);
         if (authority !== void 0) {
-          if (options.reference !== "suffix") {
+          if (options2.reference !== "suffix") {
             uriTokens.push("//");
           }
           uriTokens.push(authority);
@@ -14332,7 +14332,7 @@ var require_uri_all = __commonJS({
         }
         if (components.path !== void 0) {
           var s = components.path;
-          if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
+          if (!options2.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
             s = removeDotSegments(s);
           }
           if (authority === void 0) {
@@ -14351,15 +14351,15 @@ var require_uri_all = __commonJS({
         return uriTokens.join("");
       }
       function resolveComponents(base2, relative) {
-        var options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+        var options2 = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
         var skipNormalization = arguments[3];
         var target = {};
         if (!skipNormalization) {
-          base2 = parse(serialize(base2, options), options);
-          relative = parse(serialize(relative, options), options);
+          base2 = parse(serialize(base2, options2), options2);
+          relative = parse(serialize(relative, options2), options2);
         }
-        options = options || {};
-        if (!options.tolerant && relative.scheme) {
+        options2 = options2 || {};
+        if (!options2.tolerant && relative.scheme) {
           target.scheme = relative.scheme;
           target.userinfo = relative.userinfo;
           target.host = relative.host;
@@ -14405,47 +14405,47 @@ var require_uri_all = __commonJS({
         target.fragment = relative.fragment;
         return target;
       }
-      function resolve(baseURI, relativeURI, options) {
-        var schemelessOptions = assign({ scheme: "null" }, options);
+      function resolve(baseURI, relativeURI, options2) {
+        var schemelessOptions = assign({ scheme: "null" }, options2);
         return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
       }
-      function normalize(uri, options) {
+      function normalize(uri, options2) {
         if (typeof uri === "string") {
-          uri = serialize(parse(uri, options), options);
+          uri = serialize(parse(uri, options2), options2);
         } else if (typeOf(uri) === "object") {
-          uri = parse(serialize(uri, options), options);
+          uri = parse(serialize(uri, options2), options2);
         }
         return uri;
       }
-      function equal(uriA, uriB, options) {
+      function equal(uriA, uriB, options2) {
         if (typeof uriA === "string") {
-          uriA = serialize(parse(uriA, options), options);
+          uriA = serialize(parse(uriA, options2), options2);
         } else if (typeOf(uriA) === "object") {
-          uriA = serialize(uriA, options);
+          uriA = serialize(uriA, options2);
         }
         if (typeof uriB === "string") {
-          uriB = serialize(parse(uriB, options), options);
+          uriB = serialize(parse(uriB, options2), options2);
         } else if (typeOf(uriB) === "object") {
-          uriB = serialize(uriB, options);
+          uriB = serialize(uriB, options2);
         }
         return uriA === uriB;
       }
-      function escapeComponent(str, options) {
-        return str && str.toString().replace(!options || !options.iri ? URI_PROTOCOL.ESCAPE : IRI_PROTOCOL.ESCAPE, pctEncChar);
+      function escapeComponent(str, options2) {
+        return str && str.toString().replace(!options2 || !options2.iri ? URI_PROTOCOL.ESCAPE : IRI_PROTOCOL.ESCAPE, pctEncChar);
       }
-      function unescapeComponent(str, options) {
-        return str && str.toString().replace(!options || !options.iri ? URI_PROTOCOL.PCT_ENCODED : IRI_PROTOCOL.PCT_ENCODED, pctDecChars);
+      function unescapeComponent(str, options2) {
+        return str && str.toString().replace(!options2 || !options2.iri ? URI_PROTOCOL.PCT_ENCODED : IRI_PROTOCOL.PCT_ENCODED, pctDecChars);
       }
       var handler = {
         scheme: "http",
         domainHost: true,
-        parse: function parse2(components, options) {
+        parse: function parse2(components, options2) {
           if (!components.host) {
             components.error = components.error || "HTTP URIs must have a host.";
           }
           return components;
         },
-        serialize: function serialize2(components, options) {
+        serialize: function serialize2(components, options2) {
           var secure = String(components.scheme).toLowerCase() === "https";
           if (components.port === (secure ? 443 : 80) || components.port === "") {
             components.port = void 0;
@@ -14468,7 +14468,7 @@ var require_uri_all = __commonJS({
       var handler$2 = {
         scheme: "ws",
         domainHost: true,
-        parse: function parse2(components, options) {
+        parse: function parse2(components, options2) {
           var wsComponents = components;
           wsComponents.secure = isSecure(wsComponents);
           wsComponents.resourceName = (wsComponents.path || "/") + (wsComponents.query ? "?" + wsComponents.query : "");
@@ -14476,7 +14476,7 @@ var require_uri_all = __commonJS({
           wsComponents.query = void 0;
           return wsComponents;
         },
-        serialize: function serialize2(wsComponents, options) {
+        serialize: function serialize2(wsComponents, options2) {
           if (wsComponents.port === (isSecure(wsComponents) ? 443 : 80) || wsComponents.port === "") {
             wsComponents.port = void 0;
           }
@@ -14520,7 +14520,7 @@ var require_uri_all = __commonJS({
       }
       var handler$4 = {
         scheme: "mailto",
-        parse: function parse$$1(components, options) {
+        parse: function parse$$1(components, options2) {
           var mailtoComponents = components;
           var to = mailtoComponents.to = mailtoComponents.path ? mailtoComponents.path.split(",") : [];
           mailtoComponents.path = void 0;
@@ -14538,14 +14538,14 @@ var require_uri_all = __commonJS({
                   }
                   break;
                 case "subject":
-                  mailtoComponents.subject = unescapeComponent(hfield[1], options);
+                  mailtoComponents.subject = unescapeComponent(hfield[1], options2);
                   break;
                 case "body":
-                  mailtoComponents.body = unescapeComponent(hfield[1], options);
+                  mailtoComponents.body = unescapeComponent(hfield[1], options2);
                   break;
                 default:
                   unknownHeaders = true;
-                  headers[unescapeComponent(hfield[0], options)] = unescapeComponent(hfield[1], options);
+                  headers[unescapeComponent(hfield[0], options2)] = unescapeComponent(hfield[1], options2);
                   break;
               }
             }
@@ -14556,20 +14556,20 @@ var require_uri_all = __commonJS({
           for (var _x2 = 0, _xl2 = to.length; _x2 < _xl2; ++_x2) {
             var addr = to[_x2].split("@");
             addr[0] = unescapeComponent(addr[0]);
-            if (!options.unicodeSupport) {
+            if (!options2.unicodeSupport) {
               try {
-                addr[1] = punycode.toASCII(unescapeComponent(addr[1], options).toLowerCase());
+                addr[1] = punycode.toASCII(unescapeComponent(addr[1], options2).toLowerCase());
               } catch (e) {
                 mailtoComponents.error = mailtoComponents.error || "Email address's domain name can not be converted to ASCII via punycode: " + e;
               }
             } else {
-              addr[1] = unescapeComponent(addr[1], options).toLowerCase();
+              addr[1] = unescapeComponent(addr[1], options2).toLowerCase();
             }
             to[_x2] = addr.join("@");
           }
           return mailtoComponents;
         },
-        serialize: function serialize$$1(mailtoComponents, options) {
+        serialize: function serialize$$1(mailtoComponents, options2) {
           var components = mailtoComponents;
           var to = toArray(mailtoComponents.to);
           if (to) {
@@ -14579,9 +14579,9 @@ var require_uri_all = __commonJS({
               var localPart = toAddr.slice(0, atIdx).replace(PCT_ENCODED, decodeUnreserved).replace(PCT_ENCODED, toUpperCase).replace(NOT_LOCAL_PART, pctEncChar);
               var domain = toAddr.slice(atIdx + 1);
               try {
-                domain = !options.iri ? punycode.toASCII(unescapeComponent(domain, options).toLowerCase()) : punycode.toUnicode(domain);
+                domain = !options2.iri ? punycode.toASCII(unescapeComponent(domain, options2).toLowerCase()) : punycode.toUnicode(domain);
               } catch (e) {
-                components.error = components.error || "Email address's domain name can not be converted to " + (!options.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
+                components.error = components.error || "Email address's domain name can not be converted to " + (!options2.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
               }
               to[x] = localPart + "@" + domain;
             }
@@ -14607,53 +14607,53 @@ var require_uri_all = __commonJS({
       var URN_PARSE = /^([^\:]+)\:(.*)/;
       var handler$5 = {
         scheme: "urn",
-        parse: function parse$$1(components, options) {
+        parse: function parse$$1(components, options2) {
           var matches = components.path && components.path.match(URN_PARSE);
           var urnComponents = components;
           if (matches) {
-            var scheme = options.scheme || urnComponents.scheme || "urn";
+            var scheme = options2.scheme || urnComponents.scheme || "urn";
             var nid = matches[1].toLowerCase();
             var nss = matches[2];
-            var urnScheme = scheme + ":" + (options.nid || nid);
+            var urnScheme = scheme + ":" + (options2.nid || nid);
             var schemeHandler = SCHEMES[urnScheme];
             urnComponents.nid = nid;
             urnComponents.nss = nss;
             urnComponents.path = void 0;
             if (schemeHandler) {
-              urnComponents = schemeHandler.parse(urnComponents, options);
+              urnComponents = schemeHandler.parse(urnComponents, options2);
             }
           } else {
             urnComponents.error = urnComponents.error || "URN can not be parsed.";
           }
           return urnComponents;
         },
-        serialize: function serialize$$1(urnComponents, options) {
-          var scheme = options.scheme || urnComponents.scheme || "urn";
+        serialize: function serialize$$1(urnComponents, options2) {
+          var scheme = options2.scheme || urnComponents.scheme || "urn";
           var nid = urnComponents.nid;
-          var urnScheme = scheme + ":" + (options.nid || nid);
+          var urnScheme = scheme + ":" + (options2.nid || nid);
           var schemeHandler = SCHEMES[urnScheme];
           if (schemeHandler) {
-            urnComponents = schemeHandler.serialize(urnComponents, options);
+            urnComponents = schemeHandler.serialize(urnComponents, options2);
           }
           var uriComponents = urnComponents;
           var nss = urnComponents.nss;
-          uriComponents.path = (nid || options.nid) + ":" + nss;
+          uriComponents.path = (nid || options2.nid) + ":" + nss;
           return uriComponents;
         }
       };
       var UUID = /^[0-9A-Fa-f]{8}(?:\-[0-9A-Fa-f]{4}){3}\-[0-9A-Fa-f]{12}$/;
       var handler$6 = {
         scheme: "urn:uuid",
-        parse: function parse2(urnComponents, options) {
+        parse: function parse2(urnComponents, options2) {
           var uuidComponents = urnComponents;
           uuidComponents.uuid = uuidComponents.nss;
           uuidComponents.nss = void 0;
-          if (!options.tolerant && (!uuidComponents.uuid || !uuidComponents.uuid.match(UUID))) {
+          if (!options2.tolerant && (!uuidComponents.uuid || !uuidComponents.uuid.match(UUID))) {
             uuidComponents.error = uuidComponents.error || "UUID is not valid.";
           }
           return uuidComponents;
         },
-        serialize: function serialize2(uuidComponents, options) {
+        serialize: function serialize2(uuidComponents, options2) {
           var urnComponents = uuidComponents;
           urnComponents.nss = (uuidComponents.uuid || "").toLowerCase();
           return urnComponents;
@@ -15175,10 +15175,10 @@ var require_core = __commonJS({
     exports.default = Ajv;
     Ajv.ValidationError = validation_error_1.default;
     Ajv.MissingRefError = ref_error_1.default;
-    function checkOptions(checkOpts, options, msg, log = "error") {
+    function checkOptions(checkOpts, options2, msg, log = "error") {
       for (const key in checkOpts) {
         const opt = key;
-        if (opt in options)
+        if (opt in options2)
           this.logger[log](`${msg}: option ${key}. ${checkOpts[opt]}`);
       }
     }
@@ -17546,7 +17546,7 @@ var require_utils = __commonJS({
       }
       return components;
     }
-    function recomposeAuthority(components, options) {
+    function recomposeAuthority(components, options2) {
       const uriTokens = [];
       if (components.userinfo !== void 0) {
         uriTokens.push(components.userinfo);
@@ -17633,46 +17633,46 @@ var require_schemes = __commonJS({
       wsComponents.fragment = void 0;
       return wsComponents;
     }
-    function urnParse(urnComponents, options) {
+    function urnParse(urnComponents, options2) {
       if (!urnComponents.path) {
         urnComponents.error = "URN can not be parsed";
         return urnComponents;
       }
       const matches = urnComponents.path.match(URN_REG);
       if (matches) {
-        const scheme = options.scheme || urnComponents.scheme || "urn";
+        const scheme = options2.scheme || urnComponents.scheme || "urn";
         urnComponents.nid = matches[1].toLowerCase();
         urnComponents.nss = matches[2];
-        const urnScheme = `${scheme}:${options.nid || urnComponents.nid}`;
+        const urnScheme = `${scheme}:${options2.nid || urnComponents.nid}`;
         const schemeHandler = SCHEMES[urnScheme];
         urnComponents.path = void 0;
         if (schemeHandler) {
-          urnComponents = schemeHandler.parse(urnComponents, options);
+          urnComponents = schemeHandler.parse(urnComponents, options2);
         }
       } else {
         urnComponents.error = urnComponents.error || "URN can not be parsed.";
       }
       return urnComponents;
     }
-    function urnSerialize(urnComponents, options) {
-      const scheme = options.scheme || urnComponents.scheme || "urn";
+    function urnSerialize(urnComponents, options2) {
+      const scheme = options2.scheme || urnComponents.scheme || "urn";
       const nid = urnComponents.nid.toLowerCase();
-      const urnScheme = `${scheme}:${options.nid || nid}`;
+      const urnScheme = `${scheme}:${options2.nid || nid}`;
       const schemeHandler = SCHEMES[urnScheme];
       if (schemeHandler) {
-        urnComponents = schemeHandler.serialize(urnComponents, options);
+        urnComponents = schemeHandler.serialize(urnComponents, options2);
       }
       const uriComponents = urnComponents;
       const nss = urnComponents.nss;
-      uriComponents.path = `${nid || options.nid}:${nss}`;
-      options.skipEscape = true;
+      uriComponents.path = `${nid || options2.nid}:${nss}`;
+      options2.skipEscape = true;
       return uriComponents;
     }
-    function urnuuidParse(urnComponents, options) {
+    function urnuuidParse(urnComponents, options2) {
       const uuidComponents = urnComponents;
       uuidComponents.uuid = uuidComponents.nss;
       uuidComponents.nss = void 0;
-      if (!options.tolerant && (!uuidComponents.uuid || !UUID_REG.test(uuidComponents.uuid))) {
+      if (!options2.tolerant && (!uuidComponents.uuid || !UUID_REG.test(uuidComponents.uuid))) {
         uuidComponents.error = uuidComponents.error || "UUID is not valid.";
       }
       return uuidComponents;
@@ -17737,27 +17737,27 @@ var require_fast_uri = __commonJS({
     var URL = require("url");
     var { normalizeIPv6, normalizeIPv4, removeDotSegments, recomposeAuthority, normalizeComponentEncoding } = require_utils();
     var SCHEMES = require_schemes();
-    function normalize(uri, options) {
+    function normalize(uri, options2) {
       if (typeof uri === "string") {
-        uri = serialize(parse(uri, options), options);
+        uri = serialize(parse(uri, options2), options2);
       } else if (typeof uri === "object") {
-        uri = parse(serialize(uri, options), options);
+        uri = parse(serialize(uri, options2), options2);
       }
       return uri;
     }
-    function resolve(baseURI, relativeURI, options) {
-      const schemelessOptions = Object.assign({ scheme: "null" }, options);
+    function resolve(baseURI, relativeURI, options2) {
+      const schemelessOptions = Object.assign({ scheme: "null" }, options2);
       const resolved = resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true);
       return serialize(resolved, { ...schemelessOptions, skipEscape: true });
     }
-    function resolveComponents(base, relative, options, skipNormalization) {
+    function resolveComponents(base, relative, options2, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
-        base = parse(serialize(base, options), options);
-        relative = parse(serialize(relative, options), options);
+        base = parse(serialize(base, options2), options2);
+        relative = parse(serialize(relative, options2), options2);
       }
-      options = options || {};
-      if (!options.tolerant && relative.scheme) {
+      options2 = options2 || {};
+      if (!options2.tolerant && relative.scheme) {
         target.scheme = relative.scheme;
         target.userinfo = relative.userinfo;
         target.host = relative.host;
@@ -17803,18 +17803,18 @@ var require_fast_uri = __commonJS({
       target.fragment = relative.fragment;
       return target;
     }
-    function equal(uriA, uriB, options) {
+    function equal(uriA, uriB, options2) {
       if (typeof uriA === "string") {
         uriA = unescape(uriA);
-        uriA = serialize(normalizeComponentEncoding(parse(uriA, options), true), { ...options, skipEscape: true });
+        uriA = serialize(normalizeComponentEncoding(parse(uriA, options2), true), { ...options2, skipEscape: true });
       } else if (typeof uriA === "object") {
-        uriA = serialize(normalizeComponentEncoding(uriA, true), { ...options, skipEscape: true });
+        uriA = serialize(normalizeComponentEncoding(uriA, true), { ...options2, skipEscape: true });
       }
       if (typeof uriB === "string") {
         uriB = unescape(uriB);
-        uriB = serialize(normalizeComponentEncoding(parse(uriB, options), true), { ...options, skipEscape: true });
+        uriB = serialize(normalizeComponentEncoding(parse(uriB, options2), true), { ...options2, skipEscape: true });
       } else if (typeof uriB === "object") {
-        uriB = serialize(normalizeComponentEncoding(uriB, true), { ...options, skipEscape: true });
+        uriB = serialize(normalizeComponentEncoding(uriB, true), { ...options2, skipEscape: true });
       }
       return uriA.toLowerCase() === uriB.toLowerCase();
     }
@@ -17835,13 +17835,13 @@ var require_fast_uri = __commonJS({
         secure: cmpts.secure,
         error: ""
       };
-      const options = Object.assign({}, opts);
+      const options2 = Object.assign({}, opts);
       const uriTokens = [];
-      const schemeHandler = SCHEMES[(options.scheme || components.scheme || "").toLowerCase()];
+      const schemeHandler = SCHEMES[(options2.scheme || components.scheme || "").toLowerCase()];
       if (schemeHandler && schemeHandler.serialize)
-        schemeHandler.serialize(components, options);
+        schemeHandler.serialize(components, options2);
       if (components.path !== void 0) {
-        if (!options.skipEscape) {
+        if (!options2.skipEscape) {
           components.path = escape(components.path);
           if (components.scheme !== void 0) {
             components.path = components.path.split("%3A").join(":");
@@ -17850,13 +17850,13 @@ var require_fast_uri = __commonJS({
           components.path = unescape(components.path);
         }
       }
-      if (options.reference !== "suffix" && components.scheme) {
+      if (options2.reference !== "suffix" && components.scheme) {
         uriTokens.push(components.scheme);
         uriTokens.push(":");
       }
-      const authority = recomposeAuthority(components, options);
+      const authority = recomposeAuthority(components, options2);
       if (authority !== void 0) {
-        if (options.reference !== "suffix") {
+        if (options2.reference !== "suffix") {
           uriTokens.push("//");
         }
         uriTokens.push(authority);
@@ -17866,7 +17866,7 @@ var require_fast_uri = __commonJS({
       }
       if (components.path !== void 0) {
         let s = components.path;
-        if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
+        if (!options2.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
           s = removeDotSegments(s);
         }
         if (authority === void 0) {
@@ -17886,7 +17886,7 @@ var require_fast_uri = __commonJS({
     }
     var URI_PARSE = /^(?:([^:/?#]+):)?(?:\/\/((?:([^/?#@]*)@)?(\[[^/?#\]]+\]|[^/?#:]*)(?::(\d*))?))?([^?#]*)(?:\?([^#]*))?(?:#((?:.|\n|\r)*))?/i;
     function parse(uri, opts) {
-      const options = Object.assign({}, opts);
+      const options2 = Object.assign({}, opts);
       const parsed = {
         scheme: void 0,
         userinfo: void 0,
@@ -17897,8 +17897,8 @@ var require_fast_uri = __commonJS({
         fragment: void 0
       };
       const gotEncoding = uri.indexOf("%") !== -1;
-      if (options.reference === "suffix")
-        uri = (options.scheme ? options.scheme + ":" : "") + "//" + uri;
+      if (options2.reference === "suffix")
+        uri = (options2.scheme ? options2.scheme + ":" : "") + "//" + uri;
       const matches = uri.match(URI_PARSE);
       if (matches) {
         parsed.scheme = matches[1];
@@ -17928,12 +17928,12 @@ var require_fast_uri = __commonJS({
         } else {
           parsed.reference = "uri";
         }
-        if (options.reference && options.reference !== "suffix" && options.reference !== parsed.reference) {
-          parsed.error = parsed.error || "URI is not a " + options.reference + " reference.";
+        if (options2.reference && options2.reference !== "suffix" && options2.reference !== parsed.reference) {
+          parsed.error = parsed.error || "URI is not a " + options2.reference + " reference.";
         }
-        const schemeHandler = SCHEMES[(options.scheme || parsed.scheme || "").toLowerCase()];
-        if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
-          if (parsed.host && (options.domainHost || schemeHandler && schemeHandler.domainHost)) {
+        const schemeHandler = SCHEMES[(options2.scheme || parsed.scheme || "").toLowerCase()];
+        if (!options2.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
+          if (parsed.host && (options2.domainHost || schemeHandler && schemeHandler.domainHost)) {
             try {
               parsed.host = URL.domainToASCII(parsed.host.toLowerCase());
             } catch (e) {
@@ -17959,7 +17959,7 @@ var require_fast_uri = __commonJS({
           }
         }
         if (schemeHandler && schemeHandler.parse) {
-          schemeHandler.parse(parsed, options);
+          schemeHandler.parse(parsed, options2);
         }
       } else {
         parsed.error = parsed.error || "URI can not be parsed.";
@@ -18306,7 +18306,7 @@ var require_standalone = __commonJS({
   "../../../node_modules/fast-json-stringify/lib/standalone.js"(exports, module2) {
     var fs = require("fs");
     var path = require("path");
-    function buildStandaloneCode(options, validator, isValidatorUsed, contextFunctionCode) {
+    function buildStandaloneCode(options2, validator, isValidatorUsed, contextFunctionCode) {
       const serializerCode = fs.readFileSync(path.join(__dirname, "serializer.js")).toString();
       let buildAjvCode = "";
       let ajvSchemasCode = "";
@@ -18318,7 +18318,7 @@ var require_standalone = __commonJS({
         } else {
           defaultAjvSchema = defaultMeta.$id || defaultMeta.id;
         }
-        ajvSchemasCode += `const validator = new Validator(${JSON.stringify(options.ajv || {})})
+        ajvSchemasCode += `const validator = new Validator(${JSON.stringify(options2.ajv || {})})
 `;
         for (const [id, schema] of Object.entries(validator.ajv.schemas)) {
           if (id === defaultAjvSchema)
@@ -18335,7 +18335,7 @@ var require_standalone = __commonJS({
   ${serializerCode.replace("'use strict'", "").replace("module.exports = ", "")}
   ${buildAjvCode}
 
-  const serializer = new Serializer(${JSON.stringify(options || {})})
+  const serializer = new Serializer(${JSON.stringify(options2 || {})})
   ${ajvSchemasCode}
 
   ${contextFunctionCode.replace("return main", "")}
@@ -18407,38 +18407,38 @@ var require_fast_json_stringify = __commonJS({
     var refResolver = null;
     var contextFunctions = null;
     var validatorSchemasIds = null;
-    function build(schema, options) {
+    function build(schema, options2) {
       contextFunctionsNamesBySchema.clear();
       contextFunctions = [];
       validatorSchemasIds = /* @__PURE__ */ new Set();
-      options = options || {};
+      options2 = options2 || {};
       refResolver = new RefResolver();
       rootSchemaId = schema.$id || randomUUID();
       isValidSchema(schema);
       refResolver.addSchema(schema, rootSchemaId);
-      if (options.schema) {
-        for (const key of Object.keys(options.schema)) {
-          isValidSchema(options.schema[key], key);
-          refResolver.addSchema(options.schema[key], key);
+      if (options2.schema) {
+        for (const key of Object.keys(options2.schema)) {
+          isValidSchema(options2.schema[key], key);
+          refResolver.addSchema(options2.schema[key], key);
         }
       }
-      if (options.rounding) {
-        if (!["floor", "ceil", "round"].includes(options.rounding)) {
-          throw new Error(`Unsupported integer rounding method ${options.rounding}`);
+      if (options2.rounding) {
+        if (!["floor", "ceil", "round"].includes(options2.rounding)) {
+          throw new Error(`Unsupported integer rounding method ${options2.rounding}`);
         }
       }
-      if (options.largeArrayMechanism) {
-        if (validLargeArrayMechanisms.includes(options.largeArrayMechanism)) {
-          largeArrayMechanism = options.largeArrayMechanism;
+      if (options2.largeArrayMechanism) {
+        if (validLargeArrayMechanisms.includes(options2.largeArrayMechanism)) {
+          largeArrayMechanism = options2.largeArrayMechanism;
         } else {
-          throw new Error(`Unsupported large array mechanism ${options.largeArrayMechanism}`);
+          throw new Error(`Unsupported large array mechanism ${options2.largeArrayMechanism}`);
         }
       }
-      if (options.largeArraySize) {
-        if (!Number.isNaN(Number.parseInt(options.largeArraySize, 10))) {
-          largeArraySize = options.largeArraySize;
+      if (options2.largeArraySize) {
+        if (!Number.isNaN(Number.parseInt(options2.largeArraySize, 10))) {
+          largeArraySize = options2.largeArraySize;
         } else {
-          throw new Error(`Unsupported large array size. Expected integer-like, got ${options.largeArraySize}`);
+          throw new Error(`Unsupported large array size. Expected integer-like, got ${options2.largeArraySize}`);
         }
       }
       const location = new Location(schema, rootSchemaId);
@@ -18452,8 +18452,8 @@ var require_fast_json_stringify = __commonJS({
     ${contextFunctions.join("\n")}
     return main
   `;
-      const serializer = new Serializer(options);
-      const validator = new Validator(options.ajv);
+      const serializer = new Serializer(options2);
+      const validator = new Validator(options2.ajv);
       for (const schemaId of validatorSchemasIds) {
         const schema2 = refResolver.getSchema(schemaId);
         validator.addSchema(schema2, schemaId);
@@ -18463,10 +18463,10 @@ var require_fast_json_stringify = __commonJS({
         }
       }
       const dependenciesName = ["validator", "serializer", contextFunctionCode];
-      if (options.debugMode) {
-        options.mode = "debug";
+      if (options2.debugMode) {
+        options2.mode = "debug";
       }
-      if (options.mode === "debug") {
+      if (options2.mode === "debug") {
         return {
           validator,
           serializer,
@@ -18474,10 +18474,10 @@ var require_fast_json_stringify = __commonJS({
           ajv: validator.ajv
         };
       }
-      if (options.mode === "standalone") {
+      if (options2.mode === "standalone") {
         const isValidatorUsed = validatorSchemasIds.size > 0;
         const buildStandaloneCode = require_standalone();
-        return buildStandaloneCode(options, validator, isValidatorUsed, contextFunctionCode);
+        return buildStandaloneCode(options2, validator, isValidatorUsed, contextFunctionCode);
       }
       const contextFunc = new Function("validator", "serializer", contextFunctionCode);
       const stringifyFunc = contextFunc(validator, serializer);
@@ -19098,17 +19098,17 @@ var require_standalone2 = __commonJS({
   "../../../node_modules/@fastify/fast-json-stringify-compiler/standalone.js"(exports, module2) {
     "use strict";
     var SerializerSelector = require_fast_json_stringify_compiler();
-    function StandaloneSerializer(options = { readMode: true }) {
-      if (options.readMode === true && typeof options.restoreFunction !== "function") {
+    function StandaloneSerializer(options2 = { readMode: true }) {
+      if (options2.readMode === true && typeof options2.restoreFunction !== "function") {
         throw new Error("You must provide a function for the restoreFunction-option when readMode ON");
       }
-      if (options.readMode !== true && typeof options.storeFunction !== "function") {
+      if (options2.readMode !== true && typeof options2.storeFunction !== "function") {
         throw new Error("You must provide a function for the storeFunction-option when readMode OFF");
       }
-      if (options.readMode === true) {
+      if (options2.readMode === true) {
         return function wrapper() {
           return function(opts) {
-            return options.restoreFunction(opts);
+            return options2.restoreFunction(opts);
           };
         };
       }
@@ -19118,7 +19118,7 @@ var require_standalone2 = __commonJS({
         const compiler = factory(externalSchemas, serializerOpts);
         return function(opts) {
           const serializeFuncCode = compiler(opts);
-          options.storeFunction(opts, serializeFuncCode);
+          options2.storeFunction(opts, serializeFuncCode);
           return new Function(serializeFuncCode);
         };
       };
@@ -20870,15 +20870,15 @@ var require_validator_compiler = __commonJS({
     var AjvJTD = require_jtd2();
     var defaultAjvOptions = require_default_ajv_options();
     var ValidatorCompiler = class {
-      constructor(externalSchemas, options) {
-        if (options.mode === "JTD") {
-          this.ajv = new AjvJTD(Object.assign({}, defaultAjvOptions, options.customOptions));
+      constructor(externalSchemas, options2) {
+        if (options2.mode === "JTD") {
+          this.ajv = new AjvJTD(Object.assign({}, defaultAjvOptions, options2.customOptions));
         } else {
-          this.ajv = new Ajv(Object.assign({}, defaultAjvOptions, options.customOptions));
+          this.ajv = new Ajv(Object.assign({}, defaultAjvOptions, options2.customOptions));
         }
         let addFormatPlugin = true;
-        if (options.plugins && options.plugins.length > 0) {
-          for (const plugin of options.plugins) {
+        if (options2.plugins && options2.plugins.length > 0) {
+          for (const plugin of options2.plugins) {
             if (Array.isArray(plugin)) {
               addFormatPlugin = addFormatPlugin && plugin[0].name !== "formatsPlugin";
               plugin[0](this.ajv, plugin[1]);
@@ -20920,8 +20920,8 @@ var require_serializer_compiler = __commonJS({
     var AjvJTD = require_jtd2();
     var defaultAjvOptions = require_default_ajv_options();
     var SerializerCompiler = class {
-      constructor(externalSchemas, options) {
-        this.ajv = new AjvJTD(Object.assign({}, defaultAjvOptions, options));
+      constructor(externalSchemas, options2) {
+        this.ajv = new AjvJTD(Object.assign({}, defaultAjvOptions, options2));
       }
       buildSerializerFunction({
         schema
@@ -21027,17 +21027,17 @@ var require_standalone4 = __commonJS({
     "use strict";
     var ValidatorSelector = require_ajv_compiler();
     var standaloneCode = require_standalone3().default;
-    function StandaloneValidator(options = { readMode: true }) {
-      if (options.readMode === true && !options.restoreFunction) {
+    function StandaloneValidator(options2 = { readMode: true }) {
+      if (options2.readMode === true && !options2.restoreFunction) {
         throw new Error("You must provide a restoreFunction options when readMode ON");
       }
-      if (options.readMode !== true && !options.storeFunction) {
+      if (options2.readMode !== true && !options2.storeFunction) {
         throw new Error("You must provide a storeFunction options when readMode OFF");
       }
-      if (options.readMode === true) {
+      if (options2.readMode === true) {
         return function wrapper() {
           return function(opts) {
-            return options.restoreFunction(opts);
+            return options2.restoreFunction(opts);
           };
         };
       }
@@ -21050,7 +21050,7 @@ var require_standalone4 = __commonJS({
         return function(opts) {
           const validationFunc = compiler(opts);
           const schemaValidationCode = standaloneCode(compiler[ValidatorSelector.AjvReference].ajv, validationFunc);
-          options.storeFunction(opts, schemaValidationCode);
+          options2.storeFunction(opts, schemaValidationCode);
           return validationFunc;
         };
       };
@@ -21081,23 +21081,23 @@ var require_ajv_compiler = __commonJS({
           return ret;
         };
       }
-      return function buildCompilerFromPool(externalSchemas, options) {
-        const uniqueAjvKey = getPoolKey(externalSchemas, options.customOptions);
+      return function buildCompilerFromPool(externalSchemas, options2) {
+        const uniqueAjvKey = getPoolKey(externalSchemas, options2.customOptions);
         if (validatorPool.has(uniqueAjvKey)) {
           return validatorPool.get(uniqueAjvKey);
         }
-        const compiler = new ValidatorCompiler(externalSchemas, options);
+        const compiler = new ValidatorCompiler(externalSchemas, options2);
         const ret = compiler.buildValidatorFunction.bind(compiler);
         validatorPool.set(uniqueAjvKey, ret);
-        if (options.customOptions.code !== void 0) {
+        if (options2.customOptions.code !== void 0) {
           ret[AjvReference] = compiler;
         }
         return ret;
       };
     }
-    function getPoolKey(externalSchemas, options) {
+    function getPoolKey(externalSchemas, options2) {
       const externals = JSON.stringify(externalSchemas);
-      const ajvConfig = JSON.stringify(options);
+      const ajvConfig = JSON.stringify(options2);
       return `${externals}${ajvConfig}`;
     }
     module2.exports = AjvCompiler;
@@ -21139,8 +21139,8 @@ var require_schema_controller = __commonJS({
       return new SchemaController(void 0, option);
     }
     var SchemaController = class {
-      constructor(parent, options) {
-        this.opts = options || parent && parent.opts;
+      constructor(parent, options2) {
+        this.opts = options2 || parent && parent.opts;
         this.addedSchemas = false;
         this.compilersFactory = this.opts.compilersFactory;
         this.isCustomValidatorCompiler = this.opts.isCustomValidatorCompiler || false;
@@ -24218,8 +24218,8 @@ var require_route = __commonJS({
       kRouteContext
     } = require_symbols();
     var { buildErrorHandler } = require_error_handler();
-    function buildRouting(options) {
-      const router = FindMyWay(options.config);
+    function buildRouting(options2) {
+      const router = FindMyWay(options2.config);
       let avvio;
       let fourOhFour;
       let requestIdLogLabel;
@@ -24237,7 +24237,7 @@ var require_route = __commonJS({
       let keepAliveConnections;
       let closing = false;
       return {
-        setup(options2, fastifyArgs) {
+        setup(options3, fastifyArgs) {
           avvio = fastifyArgs.avvio;
           fourOhFour = fastifyArgs.fourOhFour;
           logger = fastifyArgs.logger;
@@ -24245,13 +24245,13 @@ var require_route = __commonJS({
           setupResponseListeners = fastifyArgs.setupResponseListeners;
           throwIfAlreadyStarted = fastifyArgs.throwIfAlreadyStarted;
           validateHTTPVersion = fastifyArgs.validateHTTPVersion;
-          globalExposeHeadRoutes = options2.exposeHeadRoutes;
-          requestIdLogLabel = options2.requestIdLogLabel;
-          genReqId = options2.genReqId;
-          disableRequestLogging = options2.disableRequestLogging;
-          ignoreTrailingSlash = options2.ignoreTrailingSlash;
-          ignoreDuplicateSlashes = options2.ignoreDuplicateSlashes;
-          return503OnClosing = Object.prototype.hasOwnProperty.call(options2, "return503OnClosing") ? options2.return503OnClosing : true;
+          globalExposeHeadRoutes = options3.exposeHeadRoutes;
+          requestIdLogLabel = options3.requestIdLogLabel;
+          genReqId = options3.genReqId;
+          disableRequestLogging = options3.disableRequestLogging;
+          ignoreTrailingSlash = options3.ignoreTrailingSlash;
+          ignoreDuplicateSlashes = options3.ignoreDuplicateSlashes;
+          return503OnClosing = Object.prototype.hasOwnProperty.call(options3, "return503OnClosing") ? options3.return503OnClosing : true;
           keepAliveConnections = fastifyArgs.keepAliveConnections;
         },
         routing: router.lookup.bind(router),
@@ -24290,45 +24290,45 @@ var require_route = __commonJS({
       function isAsyncConstraint() {
         return router.constrainer.asyncStrategiesInUse.size > 0;
       }
-      function prepareRoute({ method, url, options: options2, handler, isFastify }) {
+      function prepareRoute({ method, url, options: options3, handler, isFastify }) {
         if (typeof url !== "string") {
           throw new FST_ERR_INVALID_URL(typeof url);
         }
-        if (!handler && typeof options2 === "function") {
-          handler = options2;
-          options2 = {};
+        if (!handler && typeof options3 === "function") {
+          handler = options3;
+          options3 = {};
         } else if (handler && typeof handler === "function") {
-          if (Object.prototype.toString.call(options2) !== "[object Object]") {
+          if (Object.prototype.toString.call(options3) !== "[object Object]") {
             throw new Error(`Options for ${method}:${url} route must be an object`);
-          } else if (options2.handler) {
-            if (typeof options2.handler === "function") {
+          } else if (options3.handler) {
+            if (typeof options3.handler === "function") {
               throw new Error(`Duplicate handler for ${method}:${url} route is not allowed!`);
             } else {
               throw new Error(`Handler for ${method}:${url} route must be a function`);
             }
           }
         }
-        options2 = Object.assign({}, options2, {
+        options3 = Object.assign({}, options3, {
           method,
           url,
           path: url,
-          handler: handler || options2 && options2.handler
+          handler: handler || options3 && options3.handler
         });
-        return route.call(this, { options: options2, isFastify });
+        return route.call(this, { options: options3, isFastify });
       }
-      function hasRoute({ options: options2 }) {
+      function hasRoute({ options: options3 }) {
         return router.find(
-          options2.method,
-          options2.url || "",
-          options2.constraints
+          options3.method,
+          options3.url || "",
+          options3.constraints
         ) !== null;
       }
-      function route({ options: options2, isFastify }) {
-        const opts = { ...options2 };
+      function route({ options: options3, isFastify }) {
+        const opts = { ...options3 };
         const { exposeHeadRoute } = opts;
         const hasRouteExposeHeadRouteFlag = exposeHeadRoute != null;
         const shouldExposeHead = hasRouteExposeHeadRouteFlag ? exposeHeadRoute : globalExposeHeadRoutes;
-        const headOpts = shouldExposeHead && options2.method === "GET" ? { ...options2 } : null;
+        const headOpts = shouldExposeHead && options3.method === "GET" ? { ...options3 } : null;
         throwIfAlreadyStarted("Cannot add route when fastify instance is already started!");
         const path = opts.url || opts.path || "";
         if (Array.isArray(opts.method)) {
@@ -24486,7 +24486,7 @@ var require_route = __commonJS({
             });
             done(notHandledErr);
           });
-          if (shouldExposeHead && options2.method === "GET" && !hasHEADHandler) {
+          if (shouldExposeHead && options3.method === "GET" && !hasHEADHandler) {
             const onSendHandlers = parseHeadOnSendHandlers(headOpts.onSend);
             prepareRoute.call(this, { method: "HEAD", url: path2, options: { ...headOpts, onSend: onSendHandlers }, isFastify: true });
           } else if (hasHEADHandler && exposeHeadRoute) {
@@ -24678,8 +24678,8 @@ var require_fourOhFour = __commonJS({
       onError: [],
       errorHandler: buildErrorHandler()
     };
-    function fourOhFour(options) {
-      const { logger, genReqId } = options;
+    function fourOhFour(options2) {
+      const { logger, genReqId } = options2;
       const router = FindMyWay({ onBadUrl: createOnBadUrl(), defaultRoute: fourOhFourFallBack });
       let _onBadUrlHandler = null;
       return { router, setNotFoundHandler, setContext, arrange404 };
@@ -25823,8 +25823,8 @@ var require_initialConfigValidation = __commonJS({
     var validate = require_configValidator();
     var deepClone = require_rfdc()({ circles: true, proto: false });
     var { FST_ERR_INIT_OPTS_INVALID } = require_errors2();
-    function validateInitialConfig(options) {
-      const opts = deepClone(options);
+    function validateInitialConfig(options2) {
+      const opts = deepClone(options2);
       if (!validate(opts)) {
         const error = new FST_ERR_INIT_OPTS_INVALID(JSON.stringify(validate.errors.map((e) => e.message)));
         error.errors = validate.errors;
@@ -25946,12 +25946,12 @@ var require_cookie = __commonJS({
     exports.serialize = serialize;
     var __toString = Object.prototype.toString;
     var fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
-    function parse(str, options) {
+    function parse(str, options2) {
       if (typeof str !== "string") {
         throw new TypeError("argument str must be a string");
       }
       var obj = {};
-      var opt = options || {};
+      var opt = options2 || {};
       var dec = opt.decode || decode;
       var index = 0;
       while (index < str.length) {
@@ -25978,8 +25978,8 @@ var require_cookie = __commonJS({
       }
       return obj;
     }
-    function serialize(name, val, options) {
-      var opt = options || {};
+    function serialize(name, val, options2) {
+      var opt = options2 || {};
       var enc = opt.encode || encode;
       if (typeof enc !== "function") {
         throw new TypeError("option encode is invalid");
@@ -26139,35 +26139,35 @@ var require_request2 = __commonJS({
         this.remoteAddress = remoteAddress;
       }
     };
-    function CustomRequest(options) {
+    function CustomRequest(options2) {
       return new _CustomLMRRequest(this);
       function _CustomLMRRequest(obj) {
         Request.call(obj, {
-          ...options,
+          ...options2,
           Request: void 0
         });
         Object.assign(this, obj);
         for (const fn of Object.keys(Request.prototype)) {
           this.constructor.prototype[fn] = Request.prototype[fn];
         }
-        util.inherits(this.constructor, options.Request);
+        util.inherits(this.constructor, options2.Request);
         return this;
       }
     }
-    function Request(options) {
+    function Request(options2) {
       Readable.call(this, {
         autoDestroy: false
       });
-      const parsedURL = parseURL(options.url || options.path, options.query);
+      const parsedURL = parseURL(options2.url || options2.path, options2.query);
       this.url = parsedURL.pathname + parsedURL.search;
       this.aborted = false;
       this.httpVersionMajor = 1;
       this.httpVersionMinor = 1;
       this.httpVersion = "1.1";
-      this.method = options.method ? options.method.toUpperCase() : "GET";
+      this.method = options2.method ? options2.method.toUpperCase() : "GET";
       this.headers = {};
       this.rawHeaders = [];
-      const headers = options.headers || {};
+      const headers = options2.headers || {};
       for (const field in headers) {
         const fieldLowerCase = field.toLowerCase();
         if ((fieldLowerCase === "user-agent" || fieldLowerCase === "content-type") && headers[field] === void 0) {
@@ -26181,16 +26181,16 @@ var require_request2 = __commonJS({
       if ("user-agent" in this.headers === false) {
         this.headers["user-agent"] = "lightMyRequest";
       }
-      this.headers.host = this.headers.host || options.authority || hostHeaderFromURL(parsedURL);
-      if (options.cookies) {
-        const { cookies } = options;
+      this.headers.host = this.headers.host || options2.authority || hostHeaderFromURL(parsedURL);
+      if (options2.cookies) {
+        const { cookies } = options2;
         const cookieValues = Object.keys(cookies).map((key) => cookie.serialize(key, cookies[key]));
         if (this.headers.cookie) {
           cookieValues.unshift(this.headers.cookie);
         }
         this.headers.cookie = cookieValues.join("; ");
       }
-      this.socket = new MockSocket(options.remoteAddress || "127.0.0.1");
+      this.socket = new MockSocket(options2.remoteAddress || "127.0.0.1");
       Object.defineProperty(this, "connection", {
         get() {
           warning.emit("FST_LIGHTMYREQUEST_DEP01");
@@ -26198,11 +26198,11 @@ var require_request2 = __commonJS({
         },
         configurable: true
       });
-      const signal = options.signal;
+      const signal = options2.signal;
       if (signal) {
         addAbortSignal(signal, this);
       }
-      let payload = options.payload || options.body || null;
+      let payload = options2.payload || options2.body || null;
       const payloadResume = payload && typeof payload.resume === "function";
       if (payload && typeof payload !== "string" && !payloadResume && !Buffer.isBuffer(payload)) {
         payload = JSON.stringify(payload);
@@ -26219,7 +26219,7 @@ var require_request2 = __commonJS({
       this._lightMyRequest = {
         payload,
         isDone: false,
-        simulate: options.simulate || {}
+        simulate: options2.simulate || {}
       };
       return this;
     }
@@ -26296,15 +26296,15 @@ var require_set_cookie = __commonJS({
     function isNonEmptyString(str) {
       return typeof str === "string" && !!str.trim();
     }
-    function parseString(setCookieValue, options) {
+    function parseString(setCookieValue, options2) {
       var parts = setCookieValue.split(";").filter(isNonEmptyString);
       var nameValuePairStr = parts.shift();
       var parsed = parseNameValuePair(nameValuePairStr);
       var name = parsed.name;
       var value = parsed.value;
-      options = options ? Object.assign({}, defaultParseOptions, options) : defaultParseOptions;
+      options2 = options2 ? Object.assign({}, defaultParseOptions, options2) : defaultParseOptions;
       try {
-        value = options.decodeValues ? decodeURIComponent(value) : value;
+        value = options2.decodeValues ? decodeURIComponent(value) : value;
       } catch (e) {
         console.error(
           "set-cookie-parser encountered an error while decoding a cookie with value '" + value + "'. Set options.decodeValues to false to disable this feature.",
@@ -26347,10 +26347,10 @@ var require_set_cookie = __commonJS({
       }
       return { name, value };
     }
-    function parse(input, options) {
-      options = options ? Object.assign({}, defaultParseOptions, options) : defaultParseOptions;
+    function parse(input, options2) {
+      options2 = options2 ? Object.assign({}, defaultParseOptions, options2) : defaultParseOptions;
       if (!input) {
-        if (!options.map) {
+        if (!options2.map) {
           return [];
         } else {
           return {};
@@ -26362,7 +26362,7 @@ var require_set_cookie = __commonJS({
         var sch = input.headers[Object.keys(input.headers).find(function(key) {
           return key.toLowerCase() === "set-cookie";
         })];
-        if (!sch && input.headers.cookie && !options.silent) {
+        if (!sch && input.headers.cookie && !options2.silent) {
           console.warn(
             "Warning: set-cookie-parser appears to have been called on a request object. It is designed to parse Set-Cookie headers from responses, not Cookie headers from requests. Set the option {silent: true} to suppress this warning."
           );
@@ -26372,15 +26372,15 @@ var require_set_cookie = __commonJS({
       if (!Array.isArray(input)) {
         input = [input];
       }
-      options = options ? Object.assign({}, defaultParseOptions, options) : defaultParseOptions;
-      if (!options.map) {
+      options2 = options2 ? Object.assign({}, defaultParseOptions, options2) : defaultParseOptions;
+      if (!options2.map) {
         return input.filter(isNonEmptyString).map(function(str) {
-          return parseString(str, options);
+          return parseString(str, options2);
         });
       } else {
         var cookies = {};
         return input.filter(isNonEmptyString).reduce(function(cookies2, str) {
-          var cookie = parseString(str, options);
+          var cookie = parseString(str, options2);
           cookies2[cookie.name] = cookie;
           return cookies2;
         }, cookies);
@@ -27417,11 +27417,11 @@ var require_light_my_request = __commonJS({
     var Response = require_response();
     var errorMessage = "The dispatch function has already been invoked";
     var optsValidator = require_configValidator2();
-    function inject(dispatchFunc, options, callback) {
+    function inject(dispatchFunc, options2, callback) {
       if (typeof callback === "undefined") {
-        return new Chain(dispatchFunc, options);
+        return new Chain(dispatchFunc, options2);
       } else {
-        return doInject(dispatchFunc, options, callback);
+        return doInject(dispatchFunc, options2, callback);
       }
     }
     function makeRequest(dispatchFunc, server, req, res) {
@@ -27435,28 +27435,28 @@ var require_light_my_request = __commonJS({
       });
       return req.prepare(() => dispatchFunc.call(server, req, res));
     }
-    function doInject(dispatchFunc, options, callback) {
-      options = typeof options === "string" ? { url: options } : options;
-      if (options.validate !== false) {
+    function doInject(dispatchFunc, options2, callback) {
+      options2 = typeof options2 === "string" ? { url: options2 } : options2;
+      if (options2.validate !== false) {
         assert(typeof dispatchFunc === "function", "dispatchFunc should be a function");
-        const isOptionValid = optsValidator(options);
+        const isOptionValid = optsValidator(options2);
         if (!isOptionValid) {
           throw new Error(optsValidator.errors.map((e) => e.message));
         }
       }
-      const server = options.server || {};
-      const RequestConstructor = options.Request ? Request.CustomRequest : Request;
+      const server = options2.server || {};
+      const RequestConstructor = options2.Request ? Request.CustomRequest : Request;
       if (dispatchFunc.request && dispatchFunc.request.app === dispatchFunc) {
         Object.setPrototypeOf(Object.getPrototypeOf(dispatchFunc.request), RequestConstructor.prototype);
         Object.setPrototypeOf(Object.getPrototypeOf(dispatchFunc.response), Response.prototype);
       }
       if (typeof callback === "function") {
-        const req = new RequestConstructor(options);
+        const req = new RequestConstructor(options2);
         const res = new Response(req, callback);
         return makeRequest(dispatchFunc, server, req, res);
       } else {
         return new Promise((resolve, reject) => {
-          const req = new RequestConstructor(options);
+          const req = new RequestConstructor(options2);
           const res = new Response(req, resolve, reject);
           makeRequest(dispatchFunc, server, req, res);
         });
@@ -27626,58 +27626,58 @@ var require_fastify = __commonJS({
       });
       return Object.assign({}, cleanKeys);
     }
-    function fastify2(options) {
-      options = options || {};
-      if (typeof options !== "object") {
+    function fastify2(options2) {
+      options2 = options2 || {};
+      if (typeof options2 !== "object") {
         throw new TypeError("Options must be an object");
       }
-      if (options.querystringParser && typeof options.querystringParser !== "function") {
-        throw new Error(`querystringParser option should be a function, instead got '${typeof options.querystringParser}'`);
+      if (options2.querystringParser && typeof options2.querystringParser !== "function") {
+        throw new Error(`querystringParser option should be a function, instead got '${typeof options2.querystringParser}'`);
       }
-      if (options.schemaController && options.schemaController.bucket && typeof options.schemaController.bucket !== "function") {
-        throw new Error(`schemaController.bucket option should be a function, instead got '${typeof options.schemaController.bucket}'`);
+      if (options2.schemaController && options2.schemaController.bucket && typeof options2.schemaController.bucket !== "function") {
+        throw new Error(`schemaController.bucket option should be a function, instead got '${typeof options2.schemaController.bucket}'`);
       }
-      validateBodyLimitOption(options.bodyLimit);
-      const requestIdHeader = options.requestIdHeader === false ? false : options.requestIdHeader || defaultInitOptions.requestIdHeader;
-      const genReqId = reqIdGenFactory(requestIdHeader, options.genReqId);
-      const requestIdLogLabel = options.requestIdLogLabel || "reqId";
-      const bodyLimit = options.bodyLimit || defaultInitOptions.bodyLimit;
-      const disableRequestLogging = options.disableRequestLogging || false;
+      validateBodyLimitOption(options2.bodyLimit);
+      const requestIdHeader = options2.requestIdHeader === false ? false : options2.requestIdHeader || defaultInitOptions.requestIdHeader;
+      const genReqId = reqIdGenFactory(requestIdHeader, options2.genReqId);
+      const requestIdLogLabel = options2.requestIdLogLabel || "reqId";
+      const bodyLimit = options2.bodyLimit || defaultInitOptions.bodyLimit;
+      const disableRequestLogging = options2.disableRequestLogging || false;
       const ajvOptions = Object.assign({
         customOptions: {},
         plugins: []
-      }, options.ajv);
-      const frameworkErrors = options.frameworkErrors;
+      }, options2.ajv);
+      const frameworkErrors = options2.frameworkErrors;
       if (!ajvOptions.customOptions || Object.prototype.toString.call(ajvOptions.customOptions) !== "[object Object]") {
         throw new Error(`ajv.customOptions option should be an object, instead got '${typeof ajvOptions.customOptions}'`);
       }
       if (!ajvOptions.plugins || !Array.isArray(ajvOptions.plugins)) {
         throw new Error(`ajv.plugins option should be an array, instead got '${typeof ajvOptions.plugins}'`);
       }
-      const { logger, hasLogger } = createLogger(options);
-      options.connectionTimeout = options.connectionTimeout || defaultInitOptions.connectionTimeout;
-      options.keepAliveTimeout = options.keepAliveTimeout || defaultInitOptions.keepAliveTimeout;
-      options.maxRequestsPerSocket = options.maxRequestsPerSocket || defaultInitOptions.maxRequestsPerSocket;
-      options.requestTimeout = options.requestTimeout || defaultInitOptions.requestTimeout;
-      options.logger = logger;
-      options.genReqId = genReqId;
-      options.requestIdHeader = requestIdHeader;
-      options.requestIdLogLabel = requestIdLogLabel;
-      options.disableRequestLogging = disableRequestLogging;
-      options.ajv = ajvOptions;
-      options.clientErrorHandler = options.clientErrorHandler || defaultClientErrorHandler;
-      const initialConfig = getSecuredInitialConfig(options);
-      options.exposeHeadRoutes = initialConfig.exposeHeadRoutes;
-      let constraints = options.constraints;
-      if (options.versioning) {
+      const { logger, hasLogger } = createLogger(options2);
+      options2.connectionTimeout = options2.connectionTimeout || defaultInitOptions.connectionTimeout;
+      options2.keepAliveTimeout = options2.keepAliveTimeout || defaultInitOptions.keepAliveTimeout;
+      options2.maxRequestsPerSocket = options2.maxRequestsPerSocket || defaultInitOptions.maxRequestsPerSocket;
+      options2.requestTimeout = options2.requestTimeout || defaultInitOptions.requestTimeout;
+      options2.logger = logger;
+      options2.genReqId = genReqId;
+      options2.requestIdHeader = requestIdHeader;
+      options2.requestIdLogLabel = requestIdLogLabel;
+      options2.disableRequestLogging = disableRequestLogging;
+      options2.ajv = ajvOptions;
+      options2.clientErrorHandler = options2.clientErrorHandler || defaultClientErrorHandler;
+      const initialConfig = getSecuredInitialConfig(options2);
+      options2.exposeHeadRoutes = initialConfig.exposeHeadRoutes;
+      let constraints = options2.constraints;
+      if (options2.versioning) {
         warning.emit("FSTDEP009");
         constraints = {
           ...constraints,
           version: {
             name: "version",
             mustMatchWhenDerived: true,
-            storage: options.versioning.storage,
-            deriveConstraint: options.versioning.deriveVersion,
+            storage: options2.versioning.storage,
+            deriveConstraint: options2.versioning.deriveVersion,
             validate(value) {
               if (typeof value !== "string") {
                 throw new Error("Version constraint should be a string.");
@@ -27691,22 +27691,22 @@ var require_fastify = __commonJS({
           defaultRoute,
           onBadUrl,
           constraints,
-          ignoreTrailingSlash: options.ignoreTrailingSlash || defaultInitOptions.ignoreTrailingSlash,
-          ignoreDuplicateSlashes: options.ignoreDuplicateSlashes || defaultInitOptions.ignoreDuplicateSlashes,
-          maxParamLength: options.maxParamLength || defaultInitOptions.maxParamLength,
-          caseSensitive: options.caseSensitive,
-          allowUnsafeRegex: options.allowUnsafeRegex || defaultInitOptions.allowUnsafeRegex,
+          ignoreTrailingSlash: options2.ignoreTrailingSlash || defaultInitOptions.ignoreTrailingSlash,
+          ignoreDuplicateSlashes: options2.ignoreDuplicateSlashes || defaultInitOptions.ignoreDuplicateSlashes,
+          maxParamLength: options2.maxParamLength || defaultInitOptions.maxParamLength,
+          caseSensitive: options2.caseSensitive,
+          allowUnsafeRegex: options2.allowUnsafeRegex || defaultInitOptions.allowUnsafeRegex,
           buildPrettyMeta: defaultBuildPrettyMeta,
-          querystringParser: options.querystringParser
+          querystringParser: options2.querystringParser
         }
       });
-      const fourOhFour = build404(options);
-      const httpHandler = wrapRouting(router, options);
-      options.http2SessionTimeout = initialConfig.http2SessionTimeout;
-      const { server, listen } = createServer(options, httpHandler);
+      const fourOhFour = build404(options2);
+      const httpHandler = wrapRouting(router, options2);
+      options2.http2SessionTimeout = initialConfig.http2SessionTimeout;
+      const { server, listen } = createServer(options2, httpHandler);
       const serverHasCloseAllConnections = typeof server.closeAllConnections === "function";
       const serverHasCloseIdleConnections = typeof server.closeIdleConnections === "function";
-      let forceCloseConnections = options.forceCloseConnections;
+      let forceCloseConnections = options2.forceCloseConnections;
       if (forceCloseConnections === "idle" && !serverHasCloseIdleConnections) {
         throw new FST_ERR_FORCE_CLOSE_CONNECTIONS_IDLE_NOT_AVAILABLE();
       } else if (typeof forceCloseConnections !== "boolean") {
@@ -27714,7 +27714,7 @@ var require_fastify = __commonJS({
       }
       const keepAliveConnections = !serverHasCloseAllConnections && forceCloseConnections === true ? /* @__PURE__ */ new Set() : noopSet();
       const setupResponseListeners = Reply.setupResponseListeners;
-      const schemaController = SchemaController.buildSchemaController(null, options.schemaController);
+      const schemaController = SchemaController.buildSchemaController(null, options2.schemaController);
       const fastify3 = {
         // Fastify internals
         [kState]: {
@@ -27723,7 +27723,7 @@ var require_fastify = __commonJS({
           started: false
         },
         [kKeepAliveConnections]: keepAliveConnections,
-        [kOptions]: options,
+        [kOptions]: options2,
         [kChildren]: [],
         [kServerBindings]: [],
         [kBodyLimit]: bodyLimit,
@@ -27737,11 +27737,11 @@ var require_fastify = __commonJS({
         [kReplySerializerDefault]: null,
         [kContentTypeParser]: new ContentTypeParser(
           bodyLimit,
-          options.onProtoPoisoning || defaultInitOptions.onProtoPoisoning,
-          options.onConstructorPoisoning || defaultInitOptions.onConstructorPoisoning
+          options2.onProtoPoisoning || defaultInitOptions.onProtoPoisoning,
+          options2.onConstructorPoisoning || defaultInitOptions.onConstructorPoisoning
         ),
         [kReply]: Reply.buildReply(Reply),
-        [kRequest]: Request.buildRequest(Request, options.trustProxy),
+        [kRequest]: Request.buildRequest(Request, options2.trustProxy),
         [kFourOhFour]: fourOhFour,
         [pluginUtils.registeredPlugins]: [],
         [kPluginNameChain]: ["fastify"],
@@ -27751,36 +27751,36 @@ var require_fastify = __commonJS({
         getDefaultRoute: router.getDefaultRoute.bind(router),
         setDefaultRoute: router.setDefaultRoute.bind(router),
         // routes shorthand methods
-        delete: function _delete(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "DELETE", url, options: options2, handler });
+        delete: function _delete(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "DELETE", url, options: options3, handler });
         },
-        get: function _get(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "GET", url, options: options2, handler });
+        get: function _get(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "GET", url, options: options3, handler });
         },
-        head: function _head(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "HEAD", url, options: options2, handler });
+        head: function _head(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "HEAD", url, options: options3, handler });
         },
-        patch: function _patch(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "PATCH", url, options: options2, handler });
+        patch: function _patch(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "PATCH", url, options: options3, handler });
         },
-        post: function _post(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "POST", url, options: options2, handler });
+        post: function _post(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "POST", url, options: options3, handler });
         },
-        put: function _put(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "PUT", url, options: options2, handler });
+        put: function _put(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "PUT", url, options: options3, handler });
         },
-        options: function _options(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: "OPTIONS", url, options: options2, handler });
+        options: function _options(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: "OPTIONS", url, options: options3, handler });
         },
-        all: function _all(url, options2, handler) {
-          return router.prepareRoute.call(this, { method: supportedMethods, url, options: options2, handler });
+        all: function _all(url, options3, handler) {
+          return router.prepareRoute.call(this, { method: supportedMethods, url, options: options3, handler });
         },
         // extended route
-        route: function _route(options2) {
-          return router.route.call(this, { options: options2 });
+        route: function _route(options3) {
+          return router.route.call(this, { options: options3 });
         },
-        hasRoute: function _route(options2) {
-          return router.hasRoute.call(this, { options: options2 });
+        hasRoute: function _route(options3) {
+          return router.hasRoute.call(this, { options: options3 });
         },
         // expose logger instance
         log: logger,
@@ -27883,11 +27883,11 @@ var require_fastify = __commonJS({
           }
         }
       });
-      if (options.schemaErrorFormatter) {
-        validateSchemaErrorFormatter(options.schemaErrorFormatter);
-        fastify3[kSchemaErrorFormatter] = options.schemaErrorFormatter.bind(fastify3);
+      if (options2.schemaErrorFormatter) {
+        validateSchemaErrorFormatter(options2.schemaErrorFormatter);
+        fastify3[kSchemaErrorFormatter] = options2.schemaErrorFormatter.bind(fastify3);
       }
-      const avvioPluginTimeout = Number(options.pluginTimeout);
+      const avvioPluginTimeout = Number(options2.pluginTimeout);
       const avvio = Avvio(fastify3, {
         autostart: false,
         timeout: isNaN(avvioPluginTimeout) === false ? avvioPluginTimeout : defaultInitOptions.pluginTimeout,
@@ -27923,17 +27923,17 @@ var require_fastify = __commonJS({
       });
       fastify3.setNotFoundHandler();
       fourOhFour.arrange404(fastify3);
-      router.setup(options, {
+      router.setup(options2, {
         avvio,
         fourOhFour,
         logger,
         hasLogger,
         setupResponseListeners,
         throwIfAlreadyStarted,
-        validateHTTPVersion: compileValidateHTTPVersion(options),
+        validateHTTPVersion: compileValidateHTTPVersion(options2),
         keepAliveConnections
       });
-      server.on("clientError", options.clientErrorHandler.bind(fastify3));
+      server.on("clientError", options2.clientErrorHandler.bind(fastify3));
       try {
         const dc = require("diagnostics_channel");
         const initChannel = dc.channel("fastify.initialization");
@@ -28213,8 +28213,12 @@ var import_fastify_multer = __toESM(require("fastify-multer"));
 var import_client = require("@prisma/client");
 var prisma = new import_client.PrismaClient();
 var Fastify = (0, import_fastify.default)({ logger: true });
-var port = process.env.API_PORT;
+var options = {
+  port: 3333,
+  host: "0.0.0.0"
+};
 Fastify.register(import_fastify_multer.default.contentParser);
+Fastify.register(require("@fastify/multipart"));
 Fastify.post("/usuarios", async (request, reply) => {
   const { nome, email, photoUrl } = request.body;
   const usuario = await prisma.testUser.create({
@@ -28230,7 +28234,7 @@ Fastify.get("/", async (request, reply) => {
 });
 var start = async () => {
   try {
-    Fastify.listen(port, (err, address) => {
+    Fastify.listen(options, (err, address) => {
       if (err) {
         console.error(err);
         process.exit(1);

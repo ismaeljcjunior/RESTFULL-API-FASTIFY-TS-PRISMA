@@ -1,19 +1,21 @@
 import fastify from 'fastify'
 import { FastifyRequest, FastifyReply, FastifyInstance, FastifyListenOptions } from 'fastify'
-import fastifyPlugin from 'fastify-plugin'
 import fastifyMulter from 'fastify-multer'
 import { PrismaClient } from '@prisma/client'
+// import cors from '@fastify/cors'
 import fs from 'fs'
 
 const prisma = new PrismaClient()
 const Fastify = fastify({ logger: true })
-const port = process.env.API_PORT as number | string
+const options = {
+  port: 3333,
+  host: '0.0.0.0'
+}
 
-
-
-Fastify.register(fastifyMulter.contentParser)
-// Fastify.register(require('fastify-cors'), {})
-// Fastify.register(require('fastify-multipart'), { addToBody: true})
+// Fastify.register(fastifyMulter.contentParser)
+// Fastify.register(cors,{})
+// Fastify.register(require('@fastify/multipart'))
+Fastify.register(require('@fastify/multipart'))
 
 interface IUsuarioProps {
   nome: string;
@@ -39,7 +41,7 @@ Fastify.get('/', async (request, reply) => {
 ////////////////////////////////////////////////////////////////
 const start = async () => {
   try {
-    Fastify.listen(port, (err, address) => {
+    Fastify.listen(options, (err, address) => {
       if (err) {
         console.error(err);
         process.exit(1);
