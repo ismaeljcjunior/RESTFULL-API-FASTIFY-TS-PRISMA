@@ -1,47 +1,58 @@
-const fastify = require('fastify')()
-import { FastifyRequest, FastifyReply } from 'fastify'
-import { FastifyMultipartFiles } from 'fastify-multipart';
-const port = process.env.API_PORT
-import fs from 'fs';
-import { createUser } from './controllers/userController';
+import fastify from 'fastify'
+import { FastifyRequest, FastifyReply, FastifyInstance, FastifyListenOptions } from 'fastify'
+import fastifyPlugin from 'fastify-plugin'
+import fastifyMulter from 'fastify-multer'
+import { PrismaClient } from '@prisma/client'
+import fs from 'fs'
 
-fastify.register(require('fastify-cors'), {
-    // Configuração de permissões CORS, caso necessário
-});
-fastify.register(require('fastify-multipart'), {
-    addToBody: true
-});
+const prisma = new PrismaClient()
+const Fastify = fastify({ logger: true })
+const port = process.env.API_PORT as number | string
 
-// fastify.post('/', async (request: FastifyRequest, reply: FastifyReply) => {
-//     try {
-//         const { fields, files } = request.body as FastifyMultipartFiles;
-//         const user = JSON.parse(fields.user);
 
-//         const photo = files.photo;
-//         const filename = `${Date.now()}_${photo.name}`;
 
-//         const path = `uploads/${filename}`;
-//         await fs.promises.mkdir('uploads', { recursive: true });
-//         await fs.promises.writeFile(path, photo.data);
+Fastify.register(fastifyMulter.contentParser)
+// Fastify.register(require('fastify-cors'), {})
+// Fastify.register(require('fastify-multipart'), { addToBody: true})
 
-//         user.photoUrl = path;
-
-//         reply.type('application/json').send(user);
-//     } catch (error) {
-//         console.error(error);
-//         reply.status(500).send({ error: 'Erro interno do servidor' });
-//     }
-// });
-
-fastify.post('/users', createUser);
-
-const start = async () => {
-    try {
-        await fastify.listen(port);
-        console.log(`Servidor iniciado na porta ${port}`);
-    } catch (error) {
-        console.error(error);
-        process.exit(1);
-    }
+interface IUsuarioProps {
+  nome: string;
+  email: string;
+  photoUrl: string;
 }
-start();
+
+Fastify.post('/usuarios', async (request: FastifyRequest, reply: FastifyReply) => {
+  const { nome, email, photoUrl } = request.body as IUsuarioProps
+  const usuario = await prisma.testUser.create({
+    data: {
+      nome,
+      email,
+      photoUrl,
+    },
+  });
+  reply.send(usuario);
+});
+
+Fastify.get('/', async (request, reply) => {
+
+})
+////////////////////////////////////////////////////////////////
+const start = async () => {
+  try {
+    Fastify.listen(port, (err, address) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      console.log(`Servidor escutando em ${address}`);
+
+    });
+  } catch (err) {
+    Fastify.log.error(err);
+    process.exit(1);
+  }
+};
+
+
+
+start()
