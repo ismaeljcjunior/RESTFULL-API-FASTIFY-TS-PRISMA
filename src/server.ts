@@ -12,10 +12,11 @@ const options = {
   host: '0.0.0.0'
 }
 
-// Fastify.register(fastifyMulter.contentParser)
+Fastify.register(fastifyMulter.contentParser)
 // Fastify.register(cors,{})
+
 // Fastify.register(require('@fastify/multipart'))
-Fastify.register(require('@fastify/multipart'))
+
 
 interface IUsuarioProps {
   nome: string;
