@@ -15,7 +15,7 @@ const options = {
 Fastify.register(fastifyMulter.contentParser)
 // Fastify.register(cors,{})
 
-// Fastify.register(require('@fastify/multipart'))
+ Fastify.register(require('@fastify/multipart'))
 
 
 interface IUsuarioProps {
